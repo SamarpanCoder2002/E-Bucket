@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:e_bucket/Screens/Common%20Screens/common_auth_screen.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({Key? key}) : super(key: key);
@@ -11,6 +12,8 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
+  bool _pwdEyeLined = true;
+
   @override
   Widget build(BuildContext context) {
     return CommonAuthScreen(
@@ -31,11 +34,17 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Form(
               child: Column(
                 children: [
-                  _logInFields(labelText: 'Email-Id'),
+                  _logInFields(
+                      labelText: 'Email-Id',
+                      iconData: Icons.person_outline_outlined),
                   SizedBox(
                     height: 20.0,
                   ),
-                  _logInFields(labelText: 'Password'),
+                  _logInFields(
+                      labelText: 'Password',
+                      iconData: this._pwdEyeLined
+                          ? Entypo.eye_with_line
+                          : Entypo.eye),
                   SizedBox(
                     height: 30.0,
                   ),
@@ -86,9 +95,23 @@ class _AuthScreenState extends State<AuthScreen> {
     );
   }
 
-  Widget _logInFields({required String labelText}) {
+  Widget _logInFields({required String labelText, required IconData iconData}) {
     return TextFormField(
+      obscureText: labelText == 'Password' ? this._pwdEyeLined : false,
       decoration: InputDecoration(
+        suffixIcon: IconButton(
+          icon: Icon(iconData),
+          onPressed: () {
+            if (labelText == 'Password') {
+              if (mounted) {
+                setState(() {
+                  this._pwdEyeLined = !this._pwdEyeLined;
+                });
+              }
+            }
+          },
+          color: Theme.of(context).accentColor,
+        ),
         labelText: labelText,
         labelStyle: TextStyle(
             color: Theme.of(context).accentColor, fontWeight: FontWeight.w400),

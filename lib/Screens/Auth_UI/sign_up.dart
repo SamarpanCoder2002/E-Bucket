@@ -1,3 +1,4 @@
+import 'package:e_bucket/AuthManagement/google_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _signUpKey = GlobalKey();
 
   final EmailAuthentication _emailAuthentication = EmailAuthentication();
+  final GoogleAuthentication _googleAuth = GoogleAuthentication();
 
   /// Regular Expression
   final RegExp _emailRegex = RegExp(
@@ -181,37 +183,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _connectWithOtherOptions() {
-    return Container(
-        height: 90.0,
-        color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Or Connect With',
-              style: TextStyle(
-                  fontSize: 20.0,
-                  color: Theme.of(context).accentColor,
-                  fontWeight: FontWeight.w500),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Image.asset(
-                  'assets/images/google.png',
-                  width: 50.0,
-                ),
-                Image.asset(
-                  'assets/images/fbook.png',
-                  width: 50.0,
-                ),
-              ],
-            ),
-          ],
-        ));
-  }
-
   Future<void> _emailSignUpProgress() async {
     if (mounted) {
       setState(() {
@@ -248,5 +219,69 @@ class _SignUpScreenState extends State<SignUpScreen> {
         this._isLoading = false;
       });
     }
+  }
+
+  Widget _connectWithOtherOptions() {
+    return Container(
+        height: 90.0,
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Or Connect With',
+              style: TextStyle(
+                  fontSize: 20.0,
+                  color: Theme.of(context).accentColor,
+                  fontWeight: FontWeight.w500),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    if (mounted) {
+                      setState(() {
+                        this._isLoading = true;
+                      });
+                    }
+
+                    final bool response = await _googleAuth.signInWithGoogle();
+
+                    late String msg;
+
+                    msg = response
+                        ? 'Sign In Successful'
+                        : 'Sign In Not Successful';
+
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(msg)));
+
+                    if (mounted) {
+                      setState(() {
+                        this._isLoading = false;
+                      });
+                    }
+                  },
+                  child: Image.asset(
+                    'assets/images/google.png',
+                    width: 50.0,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () async {
+                    final bool response = await _googleAuth.logOut();
+
+                    print('Google Log Out Response: $response');
+                  },
+                  child: Image.asset(
+                    'assets/images/fbook.png',
+                    width: 50.0,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }

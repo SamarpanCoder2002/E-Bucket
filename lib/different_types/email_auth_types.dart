@@ -1,4 +1,4 @@
-enum EmailVerificationTypes{
+enum EmailVerificationTypes {
   EmailVerified,
   NotEmailVerified,
   Error,

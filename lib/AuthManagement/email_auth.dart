@@ -28,7 +28,7 @@ class EmailAuthentication {
       if (userCredential.user!.emailVerified)
         return EmailVerificationTypes.EmailVerified;
 
-      await FirebaseAuth.instance.signOut();
+      await logOut();
       return EmailVerificationTypes.NotEmailVerified;
     } catch (e) {
       print('Email LogIn Error: ${e.toString()}');

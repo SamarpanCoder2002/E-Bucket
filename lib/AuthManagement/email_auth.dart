@@ -38,6 +38,7 @@ class EmailAuthentication {
 
   Future<void> logOut() async {
     try {
+      print('Email Log Out');
       await FirebaseAuth.instance.signOut();
     } catch (e) {
       print('Email Logout Error: ${e.toString()}');

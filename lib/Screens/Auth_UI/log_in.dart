@@ -1,4 +1,5 @@
 import 'package:e_bucket/AuthManagement/email_auth.dart';
+import 'package:e_bucket/AuthManagement/facebook_auth.dart';
 import 'package:e_bucket/AuthManagement/google_auth.dart';
 import 'package:e_bucket/different_types/email_auth_types.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class _LogInScreenState extends State<LogInScreen> {
 
   final EmailAuthentication _emailAuthentication = EmailAuthentication();
   final GoogleAuthentication _googleAuth = GoogleAuthentication();
+  final FacebookAuthentication _facebookAuthentication = FacebookAuthentication();
 
   /// Regular Expression
   final RegExp _emailRegex = RegExp(
@@ -217,6 +219,7 @@ class _LogInScreenState extends State<LogInScreen> {
       final EmailVerificationTypes response = await this
           ._emailAuthentication
           .logIn(email: this._email.text, pwd: this._pwd.text);
+
       late String msg;
       if (response == EmailVerificationTypes.NotEmailVerified)
         msg =
@@ -225,6 +228,7 @@ class _LogInScreenState extends State<LogInScreen> {
         msg = 'Email or Password Invalid';
       else {
         msg = 'Sign In Completed';
+        Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -275,6 +279,9 @@ class _LogInScreenState extends State<LogInScreen> {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(msg)));
 
+                    if(response)
+                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+
                     if (mounted) {
                       setState(() {
                         this._isLoading = false;
@@ -288,9 +295,28 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    final bool response = await _googleAuth.logOut();
 
-                    print('Google Log Out Response: $response');
+                    if(mounted){
+                      setState(() {
+                        this._isLoading = true;
+                      });
+                    }
+
+                    final bool response = await _facebookAuthentication.facebookLogIn();
+                    print('Facebook LogIn Response: $response');
+
+                    final String msg = response?'SignIn Successful':'SignIn Not Successful';
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+                    if(response)
+                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+
+                    if(mounted){
+                      setState(() {
+                        this._isLoading = false;
+                      });
+                    }
                   },
                   child: Image.asset(
                     'assets/images/fbook.png',

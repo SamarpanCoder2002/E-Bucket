@@ -1,3 +1,4 @@
+import 'package:e_bucket/AuthManagement/facebook_auth.dart';
 import 'package:e_bucket/AuthManagement/google_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,6 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   final EmailAuthentication _emailAuthentication = EmailAuthentication();
   final GoogleAuthentication _googleAuth = GoogleAuthentication();
+  final FacebookAuthentication _facebookAuthentication = FacebookAuthentication();
 
   /// Regular Expression
   final RegExp _emailRegex = RegExp(
@@ -257,6 +259,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(msg)));
 
+                    if(response)
+                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+
                     if (mounted) {
                       setState(() {
                         this._isLoading = false;
@@ -270,9 +275,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 GestureDetector(
                   onTap: () async {
-                    final bool response = await _googleAuth.logOut();
 
-                    print('Google Log Out Response: $response');
+                    if(mounted){
+                      setState(() {
+                        this._isLoading = true;
+                      });
+                    }
+
+                    final bool response = await _facebookAuthentication.facebookLogIn();
+                    print('Facebook LogIn Response: $response');
+
+                    final String msg = response?'SignIn Successful':'SignIn Not Successful';
+
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+
+                    if(response)
+                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+
+                    if(mounted){
+                      setState(() {
+                        this._isLoading = false;
+                      });
+                    }
                   },
                   child: Image.asset(
                     'assets/images/fbook.png',

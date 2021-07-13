@@ -40,6 +40,8 @@ class GoogleAuthentication {
 
   Future<bool> logOut() async {
     try {
+      print('Google Log out');
+
       await _googleSignIn.disconnect();
       await _googleSignIn.signOut();
       await FirebaseAuth.instance.signOut();

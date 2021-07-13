@@ -1,4 +1,5 @@
 import 'package:e_bucket/Screens/Auth_UI/sign_up.dart';
+import 'package:e_bucket/Screens/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -13,6 +14,8 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => LogInScreen());
       case '/signup':
         return MaterialPageRoute(builder: (_) => SignUpScreen());
+      case '/blankScreen':
+        return MaterialPageRoute(builder: (_) => HomeScreen());
 
       default:
         return MaterialPageRoute(builder: (_) => LogInScreen());

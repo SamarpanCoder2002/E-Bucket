@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 import 'package:e_bucket/Screens/Common%20Screens/common_auth_screen.dart';
-import 'package:flutter/services.dart';
+import 'package:e_bucket/AuthManagement/email_auth.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -14,54 +17,92 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   bool _pwdEyeLined = true;
 
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _pwd = TextEditingController();
+  final TextEditingController _conformPwd = TextEditingController();
+
+  final GlobalKey<FormState> _signUpKey = GlobalKey();
+
+  final EmailAuthentication _emailAuthentication = EmailAuthentication();
+
+  /// Regular Expression
+  final RegExp _emailRegex = RegExp(
+      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
-    return CommonAuthScreen(
-      bottomWidget: null,
-      child: ListView(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            margin: EdgeInsets.only(top: 30.0),
-            child: Text(
-              'Sign Up',
-              style: TextStyle(
-                  fontSize: 25.0, color: Theme.of(context).accentColor),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
-            child: Form(
-              child: Column(
-                children: [
-                  _logInFields(
-                      labelText: 'Email-Id',
-                      iconData: Icons.person_outline_outlined),
-                  SizedBox(
-                    height: 30.0,
-                  ),
-                  _doneBtn(),
-                  SizedBox(
-                    height: 50.0,
-                  ),
-                  _connectWithOtherOptions(),
-                ],
+    return LoadingOverlay(
+      isLoading: this._isLoading,
+      child: CommonAuthScreen(
+        bottomWidget: null,
+        child: ListView(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              margin: EdgeInsets.only(top: 30.0),
+              child: Text(
+                'Sign Up',
+                style: TextStyle(
+                    fontSize: 25.0, color: Theme.of(context).accentColor),
               ),
             ),
-          ),
-        ],
+            Container(
+              margin: EdgeInsets.only(top: 30.0, left: 20.0, right: 20.0),
+              child: Form(
+                key: this._signUpKey,
+                child: Column(
+                  children: [
+                    _logInFields(
+                        labelText: 'Email-Id',
+                        iconData: Icons.person_outline_outlined),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    _logInFields(
+                        labelText: 'Password',
+                        iconData: this._pwdEyeLined
+                            ? Entypo.eye_with_line
+                            : Entypo.eye),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                    _logInFields(
+                        labelText: 'Conform Password',
+                        iconData: this._pwdEyeLined
+                            ? Entypo.eye_with_line
+                            : Entypo.eye),
+                    SizedBox(
+                      height: 30.0,
+                    ),
+                    _doneBtn(context),
+                    SizedBox(
+                      height: 50.0,
+                    ),
+                    _connectWithOtherOptions(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _logInFields({required String labelText, required IconData iconData}) {
     return TextFormField(
-      obscureText: labelText == 'Password' ? this._pwdEyeLined : false,
+      controller: _chooseRightController(labelText: labelText),
+      validator: (inputText) => _validator(inputText, labelText),
+      obscureText: labelText == 'Password' || labelText == 'Conform Password'
+          ? this._pwdEyeLined
+          : false,
       decoration: InputDecoration(
         suffixIcon: IconButton(
           icon: Icon(iconData),
           onPressed: () {
-            if (labelText == 'Password') {
+            if (labelText == 'Password' || labelText == 'Conform Password') {
               if (mounted) {
                 setState(() {
                   this._pwdEyeLined = !this._pwdEyeLined;
@@ -88,31 +129,55 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Widget _doneBtn() {
+  TextEditingController? _chooseRightController({required String labelText}) {
+    switch (labelText) {
+      case 'Password':
+        return this._pwd;
+      case 'Conform Password':
+        return this._conformPwd;
+      default:
+        return this._email;
+    }
+  }
+
+  String? _validator(String? inputText, String labelText) {
+    if (labelText == 'Email-Id') {
+      if (!this._emailRegex.hasMatch(inputText!))
+        return 'Email Format Not Matching';
+      return null;
+    } else if (labelText == 'Password') {
+      if (inputText!.length < 6)
+        return 'Password must be at least 6 characters';
+      return null;
+    } else {
+      if (inputText!.length < 6)
+        return 'Password must be at least 6 characters';
+      if (inputText != this._pwd.text)
+        return 'Password and Conform Password Not Matched';
+      return null;
+    }
+  }
+
+  Widget _doneBtn(BuildContext context) {
     return Container(
       width: double.maxFinite,
       height: 50.0,
       child: ElevatedButton(
-        child: Text(
-          'Done',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20.0,
+          child: Text(
+            'Done',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+            ),
           ),
-        ),
-        style: ElevatedButton.styleFrom(
-            primary: const Color.fromRGBO(4, 123, 213, 1),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0),
-            )),
-        onPressed: () => _emailCodeAndPwdDialog(
-          forCode: true,
-          headingText: 'Enter the Code Sent to Email',
-          textInputType: TextInputType.number,
-          labelText: '6-digit-code',
-          inputLimitation: 6,
-        ),
-      ),
+          style: ElevatedButton.styleFrom(
+              primary: const Color.fromRGBO(4, 123, 213, 1),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              )),
+          onPressed: () async {
+            await _emailSignUpProgress();
+          }),
     );
   }
 
@@ -147,85 +212,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ));
   }
 
-  void _emailCodeAndPwdDialog({
-    required String? labelText,
-    required TextInputType? textInputType,
-    required int? inputLimitation,
-    required String headingText,
-    required bool forCode,
-  }) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        elevation: 0.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.0),
-        ),
-        title: Center(
-          child: Text(
-            headingText,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 18.0,
-                color: Theme.of(context).accentColor,
-                fontWeight: FontWeight.w500),
-          ),
-        ),
-        content: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          height: 150.0,
-          child: Column(
-            children: [
-              TextField(
-                keyboardType: textInputType,
-                inputFormatters: [
-                  LengthLimitingTextInputFormatter(inputLimitation),
-                ],
-                decoration: InputDecoration(
-                  labelText: labelText,
-                  labelStyle: TextStyle(
-                      color: Theme.of(context).accentColor,
-                      fontWeight: FontWeight.w400),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                        color: const Color.fromRGBO(4, 123, 213, 1),
-                        width: 1.5),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide(
-                        color: const Color.fromRGBO(4, 123, 213, 1),
-                        width: 1.5),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20.0,
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Done',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.0,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  if (forCode)
-                    _emailCodeAndPwdDialog(
-                        labelText: 'Password',
-                        textInputType: TextInputType.name,
-                        inputLimitation: null,
-                        headingText: 'Enter new Password',
-                        forCode: false);
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  Future<void> _emailSignUpProgress() async {
+    if (mounted) {
+      setState(() {
+        this._isLoading = true;
+      });
+    }
+
+    /// Close the keyboard
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
+    print('${this._email.text}  ${this._pwd.text}');
+    if (!this._signUpKey.currentState!.validate()) {
+      print('Not Validate');
+    } else {
+      final bool response = await _emailAuthentication.signUp(
+          email: this._email.text, pwd: this._pwd.text);
+
+      String msg;
+
+      if (response)
+        msg = 'Sign Up Completed. A verification link sent to the email';
+      else
+        msg = 'Email Already Present';
+
+      Navigator.pop(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(msg),
+      ));
+    }
+
+    if (mounted) {
+      setState(() {
+        this._isLoading = false;
+      });
+    }
   }
 }

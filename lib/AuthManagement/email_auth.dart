@@ -44,4 +44,14 @@ class EmailAuthentication {
       print('Email Logout Error: ${e.toString()}');
     }
   }
+
+  Future<bool> sendResetEmail({required String email}) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      return true;
+    } catch (e) {
+      print('Reset email error is: ${e.toString()}');
+      return false;
+    }
+  }
 }

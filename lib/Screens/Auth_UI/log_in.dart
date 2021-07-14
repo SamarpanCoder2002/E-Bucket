@@ -27,7 +27,8 @@ class _LogInScreenState extends State<LogInScreen> {
 
   final EmailAuthentication _emailAuthentication = EmailAuthentication();
   final GoogleAuthentication _googleAuth = GoogleAuthentication();
-  final FacebookAuthentication _facebookAuthentication = FacebookAuthentication();
+  final FacebookAuthentication _facebookAuthentication =
+      FacebookAuthentication();
 
   /// Regular Expression
   final RegExp _emailRegex = RegExp(
@@ -83,7 +84,38 @@ class _LogInScreenState extends State<LogInScreen> {
                         child: Text(
                           'Forgot Password?',
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          if (!this._emailRegex.hasMatch(this._email.text))
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Email not found')));
+                          else {
+                            if (mounted) {
+                              setState(() {
+                                this._isLoading = true;
+                              });
+                            }
+
+                            /// Close the keyboard
+                            SystemChannels.textInput
+                                .invokeMethod('TextInput.hide');
+
+                            final bool response = await _emailAuthentication
+                                .sendResetEmail(email: this._email.text);
+
+                            final String msg = response
+                                ? 'Email reset link sent to this email\nPassword must be at least 6 characters'
+                                : 'Email not found...\nMake sure you already signedUp with this email';
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(SnackBar(content: Text(msg)));
+
+                            if (mounted) {
+                              setState(() {
+                                this._isLoading = false;
+                              });
+                            }
+                          }
+                        },
                       ),
                     ),
                     Container(
@@ -228,7 +260,8 @@ class _LogInScreenState extends State<LogInScreen> {
         msg = 'Email or Password Invalid';
       else {
         msg = 'Sign In Completed';
-        Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/blankScreen', (route) => false);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -279,8 +312,9 @@ class _LogInScreenState extends State<LogInScreen> {
                     ScaffoldMessenger.of(context)
                         .showSnackBar(SnackBar(content: Text(msg)));
 
-                    if(response)
-                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+                    if (response)
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/blankScreen', (route) => false);
 
                     if (mounted) {
                       setState(() {
@@ -295,24 +329,28 @@ class _LogInScreenState extends State<LogInScreen> {
                 ),
                 GestureDetector(
                   onTap: () async {
-
-                    if(mounted){
+                    if (mounted) {
                       setState(() {
                         this._isLoading = true;
                       });
                     }
 
-                    final bool response = await _facebookAuthentication.facebookLogIn();
+                    final bool response =
+                        await _facebookAuthentication.facebookLogIn();
                     print('Facebook LogIn Response: $response');
 
-                    final String msg = response?'SignIn Successful':'SignIn Not Successful';
+                    final String msg = response
+                        ? 'SignIn Successful'
+                        : 'SignIn Not Successful';
 
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(msg)));
 
-                    if(response)
-                      Navigator.of(context).pushNamedAndRemoveUntil('/blankScreen', (route) => false);
+                    if (response)
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          '/blankScreen', (route) => false);
 
-                    if(mounted){
+                    if (mounted) {
                       setState(() {
                         this._isLoading = false;
                       });

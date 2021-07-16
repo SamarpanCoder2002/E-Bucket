@@ -32,6 +32,7 @@ dependencies:
   flutter_facebook_auth: ^3.5.0
 
   loading_overlay: ^0.3.0
+  carousel_slider: ^4.0.0
 
 
   # The following adds the Cupertino Icons font to your application.

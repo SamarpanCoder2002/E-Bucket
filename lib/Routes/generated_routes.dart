@@ -1,5 +1,6 @@
 import 'package:e_bucket/Screens/Auth_UI/sign_up.dart';
 import 'package:e_bucket/Screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,7 +10,9 @@ class AppRouter {
   Route? onGenerateRoute(RouteSettings routeSettings) {
     switch (routeSettings.name) {
       case '/':
-        return MaterialPageRoute(builder: (_) => LogInScreen());
+        return FirebaseAuth.instance.currentUser == null
+            ? MaterialPageRoute(builder: (_) => LogInScreen())
+            : MaterialPageRoute(builder: (_) => HomeScreen());
       case '/login':
         return MaterialPageRoute(builder: (_) => LogInScreen());
       case '/signup':

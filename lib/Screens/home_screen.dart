@@ -74,14 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         body: Container(
-          width: MediaQuery
-              .of(context)
-              .size
-              .width,
-          height: MediaQuery
-              .of(context)
-              .size
-              .height,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           color: Colors.white,
           child: ListView(
             shrinkWrap: true,
@@ -90,6 +84,9 @@ class _HomeScreenState extends State<HomeScreen> {
               _autoSlider(),
               _storiesSection(),
               _interestedSection(),
+              _topDiscountSection(),
+              _popularPicks(),
+              SizedBox(height: 20.0,),
             ],
           ),
         ),
@@ -99,10 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _categoryOption() {
     return Container(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       height: 70.0,
       child: ListView.builder(
         shrinkWrap: true,
@@ -136,15 +130,12 @@ class _HomeScreenState extends State<HomeScreen> {
           return Builder(
             builder: (BuildContext context) {
               return Container(
-                width: MediaQuery
-                    .of(context)
-                    .size
-                    .width,
+                width: MediaQuery.of(context).size.width,
                 margin: EdgeInsets.symmetric(horizontal: 5.0),
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: ExactAssetImage(images[i]),
-                    )),
+                  image: ExactAssetImage(images[i]),
+                )),
               );
             },
           );
@@ -156,10 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _storiesSection() {
     return Container(
       margin: EdgeInsets.only(top: 15.0, left: 5.0),
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       height: 85.0 + 40.0,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,10 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
               )),
           Container(
             padding: EdgeInsets.only(left: 10.0, right: 10.0),
-            width: MediaQuery
-                .of(context)
-                .size
-                .width,
+            width: MediaQuery.of(context).size.width,
             height: 100.0,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -199,10 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _interestedSection() {
     return Container(
-      width: MediaQuery
-          .of(context)
-          .size
-          .width,
+      width: MediaQuery.of(context).size.width,
       height: 310.0,
       margin: EdgeInsets.only(top: 15.0),
       padding: EdgeInsets.only(left: 15.0, right: 10.0, top: 5.0),
@@ -224,16 +206,21 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _interestedImageDivider(
-                  firstBlockImageUrl: 'https://4.imimg.com/data4/NY/QG/ANDROID-14827240/product-500x500.jpeg',
-                  secondBlockImageUrl: 'https://www.gizmochina.com/wp-content/uploads/2020/10/Apple-iPhone-12-Mini-500x500.jpg',
+                productImageDivider(
+                  firstBlockImageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/product-500x500.jpeg?alt=media&token=f757c5f6-7c8d-44b0-86e2-f6266e95b160',
+                  secondBlockImageUrl:
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Apple-iPhone-12-Mini-500x500.webp?alt=media&token=b1654451-3e2a-45ed-a1c0-5b570e744083',
                   firstBlockImageCaption: 'Sunglass',
-                  secondBlockImageCaption: 'IPhone',),
-                _interestedImageDivider(
-                  firstBlockImageUrl: 'https://ik.imagekit.io/sqhmihmlh/http:/debenhams.scene7.com/is/image/Debenhams/54510_230553207?wid=800&hei=800&qlt=95&ik-sdk-version=javascript-1.3.6&tr=c-limit%2Cw-500%2Ch-%2Cdefault+image-https%3A%2F%2Fik.imagekit.io%2Fsqhmihmlh%2Fmissing_image.jpg',
-                  secondBlockImageUrl: 'https://img.pngio.com/these-12-laptops-deliver-the-best-battery-life-page-6-zdnet-hd-nature-png-for-laptop-514_428.png',
+                  secondBlockImageCaption: 'IPhone',
+                ),
+                productImageDivider(
+                    firstBlockImageUrl:
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/54510_230553207.jfif?alt=media&token=8412bf0d-a3d4-47d9-889c-c4764620db7f',
+                    secondBlockImageUrl:
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/these-12-laptops-deliver-the-best-battery-life-page-6-zdnet-hd-nature-png-for-laptop-514_428.png?alt=media&token=b13e2893-d762-427d-8c84-d7e90809b0df',
                     firstBlockImageCaption: 'Dress',
-                  secondBlockImageCaption: 'Laptops'),
+                    secondBlockImageCaption: 'Laptops'),
               ],
             ),
           ),
@@ -242,8 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _interestedImageDivider(
-      {required String firstBlockImageUrl, required String secondBlockImageUrl, required String firstBlockImageCaption, required String secondBlockImageCaption}) {
+  Widget productImageDivider(
+      {required String firstBlockImageUrl,
+      required String secondBlockImageUrl,
+      required String firstBlockImageCaption,
+      required String secondBlockImageCaption}) {
     return Row(
       children: [
         Expanded(
@@ -290,6 +280,110 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _topDiscountSection() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 470,
+      ///color: Colors.red,
+      margin: EdgeInsets.only(top: 15.0),
+      padding: EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Top Discount',
+                style: TextStyle(fontSize: 18.0),
+              ),
+              Text(
+                'Discount Upto 40-60%',
+                style: TextStyle(fontSize: 18.0),
+              ),
+            ],
+          ),
+          Container(
+            width: double.maxFinite,
+            height: 420,
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                productImageDivider(
+                    firstBlockImageUrl:
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/mens-cotton-shirts-500x500.jpg?alt=media&token=2beada69-e6af-4efd-ace5-b7817c9fc48c',
+                    secondBlockImageUrl:
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41k3qq-x5CL.jpg?alt=media&token=50cae35a-8a20-483f-94e8-9bda0cf066e2',
+                    firstBlockImageCaption: 'T-Shirt',
+                    secondBlockImageCaption: 'Smart Watch'),
+                productImageDivider(
+                    firstBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Canon-EOS-250D-DSLR-Camera-with-18-55mm-IS-STM-Lens-2-Black.jpg?alt=media&token=bf6eabb4-8a66-492a-b6b9-e244d9893964',
+                    secondBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/glider-football-500x500.jpg?alt=media&token=6db85caf-5190-436c-bf04-e3a9ebc0a824',
+                    firstBlockImageCaption: 'Camera',
+                    secondBlockImageCaption: 'Football'),
+                productImageDivider(
+                    firstBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41a0powQqYL.jpg?alt=media&token=7d9a16fa-6fef-46f1-9d30-434a16e020bb',
+                    secondBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/wooden-cupboard-500x500.jpg?alt=media&token=4634c69f-8d15-4f3a-89d7-05ac66dbf344',
+                    firstBlockImageCaption: 'Binocular',
+                    secondBlockImageCaption: 'WarDrobe'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _popularPicks() {
+    return Container(
+      width: MediaQuery.of(context).size.width,
+      height: 310.0,
+      margin: EdgeInsets.only(top: 15.0),
+      padding: EdgeInsets.only(left: 15.0, right: 10.0, top: 5.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Popular Picks',
+              style: TextStyle(fontSize: 18.0),
+            ),
+          ),
+          Container(
+            width: double.maxFinite,
+            height: 270,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                productImageDivider(
+                  firstBlockImageUrl:
+                  'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/3103miMj8mL.jpg?alt=media&token=7d0754e3-dc9c-4c0f-a0b0-68559b35eaa0',
+                  secondBlockImageUrl:
+                  'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/fc7a09d8ab8bb854f93f956b4d76ee1b.jpg?alt=media&token=9cc34b28-353c-4c68-acfc-ba46ba0a531c',
+                  firstBlockImageCaption: 'IPhone',
+                  secondBlockImageCaption: 'Headset',
+                ),
+                productImageDivider(
+                    firstBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/rgb-gaming-desktop-500x500.jpg?alt=media&token=36d9d714-3f0b-4a03-a3b7-604ff4cca1b3',
+                    secondBlockImageUrl:
+                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/echo-show-8-500x500.jpg?alt=media&token=eb4b41cf-8308-4fc8-85c8-885ca072199f',
+                    firstBlockImageCaption: 'Gaming Computer',
+                    secondBlockImageCaption: 'Amazon Alexa'),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

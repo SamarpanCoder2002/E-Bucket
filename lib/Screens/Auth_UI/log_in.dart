@@ -1,5 +1,5 @@
 import 'package:e_bucket/AuthManagement/email_auth.dart';
-import 'package:e_bucket/AuthManagement/facebook_auth.dart';
+import 'package:e_bucket/AuthManagement/fb_auth.dart';
 import 'package:e_bucket/AuthManagement/google_auth.dart';
 import 'package:e_bucket/different_types/email_auth_types.dart';
 import 'package:flutter/material.dart';

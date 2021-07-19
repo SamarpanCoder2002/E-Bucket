@@ -1,7 +1,10 @@
+import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:e_bucket/different_types/email_auth_types.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class EmailAuthentication {
+  final CloudDataStore _cloudDataStore = CloudDataStore();
+
   Future<bool> signUp({required String email, required String pwd}) async {
     try {
       final UserCredential userCredential = await FirebaseAuth.instance
@@ -25,8 +28,12 @@ class EmailAuthentication {
 
       print('UserCredential: ${userCredential.additionalUserInfo}');
 
-      if (userCredential.user!.emailVerified)
+      if (userCredential.user!.emailVerified) {
+        await this
+            ._cloudDataStore
+            .dataStoreForConsumers(userCredential.user!.email.toString());
         return EmailVerificationTypes.EmailVerified;
+      }
 
       await logOut();
       return EmailVerificationTypes.NotEmailVerified;

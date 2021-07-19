@@ -1,4 +1,4 @@
-import 'package:e_bucket/AuthManagement/facebook_auth.dart';
+import 'package:e_bucket/AuthManagement/fb_auth.dart';
 import 'package:e_bucket/AuthManagement/google_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';

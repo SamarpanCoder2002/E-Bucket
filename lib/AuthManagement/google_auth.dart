@@ -1,8 +1,10 @@
+import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class GoogleAuthentication {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final CloudDataStore _cloudDataStore = CloudDataStore();
 
   Future<bool> signInWithGoogle() async {
     try {
@@ -24,6 +26,8 @@ class GoogleAuthentication {
 
           print(
               'User Credential is: ${userCredential.user}   ${userCredential.additionalUserInfo}');
+
+          await _cloudDataStore.dataStoreForConsumers(userCredential.user!.email.toString());
           return true;
         }
         return false;

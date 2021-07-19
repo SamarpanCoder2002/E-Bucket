@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import 'Routes/generated_routes.dart';
 
@@ -9,6 +10,10 @@ Future<void> main() async{
   await Firebase.initializeApp();
 
   final AppRouter _appRouter = AppRouter();
+
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: const Color.fromRGBO(4, 123, 213, 1),
+  ));
 
   runApp(
     MaterialApp(

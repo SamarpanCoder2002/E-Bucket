@@ -4,11 +4,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<<<<<<< HEAD
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
-=======
->>>>>>> 4cb0df3213bd8c768630bf00cac93fd2ff4f9726
 
    <application
         android:label="E-Bucket"

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 
 class CloudDataStore {
   final String _consumerPath = 'consumers';
@@ -23,6 +22,7 @@ class CloudDataStore {
   final String _productActualPrice = 'ProductActualPrice';
   final String _priceCurrency = 'Currency';
   final String _productDiscountPrice = 'ProductDiscountPrice';
+  final String _productMainImageUrl = 'ProductMainImageUrl';
 
   Future<void> dataStoreForConsumers(String email) async {
     try {
@@ -94,6 +94,7 @@ class CloudDataStore {
     required String priceCurrency,
     required String storeName,
     required String storeAddress,
+    required String mainProductImageUrl,
   }) async {
     try {
       final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
@@ -121,9 +122,10 @@ class CloudDataStore {
               this._productDiscountPrice: discountPrice,
               this._storeName: storeName,
               this._storeAddress: storeAddress,
+              this._productMainImageUrl: mainProductImageUrl,
             }
           ]
-        });
+        }).whenComplete(() => print('Completed Firestore Uplaod'));
       } else {
         /// Specific Category Present
         print('take');
@@ -152,6 +154,7 @@ class CloudDataStore {
                 this._productDiscountPrice: discountPrice,
                 this._storeName: storeName,
                 this._storeAddress: storeAddress,
+                this._productMainImageUrl: mainProductImageUrl,
               }
             ]
           });
@@ -160,7 +163,7 @@ class CloudDataStore {
 
           await FirebaseFirestore.instance
               .doc('$categoryName/$subCategoryName')
-              .update(tempMap);
+              .update(tempMap).whenComplete(() => print('Completed'));
         } else {
           /// Store Name Present
           print('Store All : $storeAll');
@@ -197,6 +200,7 @@ class CloudDataStore {
             this._productDiscountPrice: discountPrice,
             this._storeName: storeName,
             this._storeAddress: storeAddress,
+            this._productMainImageUrl: mainProductImageUrl,
           });
 
           print('All Store Collection: $allStoreCollection');
@@ -214,7 +218,7 @@ class CloudDataStore {
     }
   }
 
-  Future<String?> uploadMediaToStorage(File filePath,
+  Future<String> uploadMediaToStorage(File filePath,
       {required String reference}) async {
     try {
       late String? downLoadUrl;
@@ -235,7 +239,7 @@ class CloudDataStore {
         print("Download Url: $downLoadUrl}");
       });
 
-      return downLoadUrl;
+      return downLoadUrl.toString();
     } catch (e) {
       print('Error : Firebase Storage Error: ${e.toString()}');
       return '';

@@ -33,7 +33,7 @@ class _UploadProductsState extends State<UploadProducts> {
           children: [
             Container(
               width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height / 2.2,
+              height: MediaQuery.of(context).size.height / 2.1,
               margin: EdgeInsets.only(top: 10.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -1,10 +1,14 @@
+import 'dart:io';
+
 import 'package:currency_picker/currency_picker.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
 import 'package:e_bucket/Screens/Menu_Screens/common_textfield_for_upload_new_product.dart';
 import 'package:e_bucket/Screens/Menu_Screens/upload_product_screen.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
+import 'package:e_bucket/global_uses/net_connectivity_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 
 class SellProductAsSeller extends StatefulWidget {
   final String companyName;
@@ -41,6 +45,8 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
 
   final Map<int, String> _productImageContainer = Map<int, String>();
 
+  bool _isLoading = false;
+
   void _getCategoryList() async {
     this._allCategoryMap = await _cloudDataStore.allCategoryFetch();
 
@@ -60,132 +66,128 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
 
   @override
   Widget build(BuildContext context) {
-    return CommonProductScreen(
-      elevation: 5.0,
-      actionsAndMenu: false,
-      pageTitle: 'Upload Your Product Info',
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        padding: EdgeInsets.all(20.0),
-        child: Form(
-          key: this._formKey,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              textFormFieldForProduct(
-                  context: context,
-                  textEditingController: this._productName,
-                  validator: (inputVal) {
-                    if (inputVal!.isEmpty) return "Product Name Can't be Empty";
-                    return null;
-                  },
-                  labelText: 'Product Name'),
-              SizedBox(
-                height: 30.0,
-              ),
-              _mainCategorySelection(),
-              SizedBox(
-                height: 30.0,
-              ),
-              _subCategorySelection(),
-              SizedBox(
-                height: 30.0,
-              ),
-              Center(
-                child: ElevatedButton(
+    return LoadingOverlay(
+      isLoading: this._isLoading,
+      child: CommonProductScreen(
+        elevation: 5.0,
+        actionsAndMenu: false,
+        pageTitle: 'Upload Your Product Info',
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          padding: EdgeInsets.all(20.0),
+          child: Form(
+            key: this._formKey,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                textFormFieldForProduct(
+                    context: context,
+                    textEditingController: this._productName,
+                    validator: (inputVal) {
+                      if (inputVal!.isEmpty)
+                        return "Product Name Can't be Empty";
+                      return null;
+                    },
+                    labelText: 'Product Name'),
+                SizedBox(
+                  height: 30.0,
+                ),
+                _mainCategorySelection(),
+                SizedBox(
+                  height: 30.0,
+                ),
+                _subCategorySelection(),
+                SizedBox(
+                  height: 30.0,
+                ),
+                Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      primary: const Color.fromRGBO(4, 123, 213, 1),
+                    ),
+                    child: Text(
+                      'Upload Product Images',
+                      style: TextStyle(fontSize: 16.0),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => UploadProducts(
+                                  uploadPictureContainer:
+                                      this._productImageContainer)));
+
+                      print('List is: ${this._productImageContainer}');
+                    },
+                  ),
+                ),
+                SizedBox(
+                  height: 30.0,
+                ),
+                textFormFieldForProduct(
+                    context: context,
+                    textEditingController: this._productDescription,
+                    labelText: 'Product Description',
+                    validator: (inputVal) {
+                      if (inputVal!.isEmpty)
+                        return "Product Description Can't be Empty";
+                      return null;
+                    },
+                    maxLines: 5),
+                SizedBox(
+                  height: 30.0,
+                ),
+                textFormFieldForProduct(
+                    context: context,
+                    textEditingController: this._keyPoints,
+                    maxLines: 3,
+                    validator: (inputVal) {
+                      if (inputVal!.isEmpty) return "Key Points Can't be Empty";
+                      return null;
+                    },
+                    labelText: 'Key Points'),
+                SizedBox(
+                  height: 30.0,
+                ),
+                textFormFieldForProduct(
+                    context: context,
+                    textEditingController: this._quantity,
+                    labelText: 'Total Products',
+                    validator: (inputVal) {
+                      if (inputVal!.isEmpty)
+                        return "Total Products Can't be Empty";
+                      return null;
+                    },
+                    textInputType: TextInputType.number),
+                SizedBox(
+                  height: 10.0,
+                ),
+                _priceSection(),
+                SizedBox(
+                  height: 20.0,
+                ),
+                ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     primary: const Color.fromRGBO(4, 123, 213, 1),
                   ),
                   child: Text(
-                    'Upload Product Images',
+                    'Upload Product Info',
                     style: TextStyle(fontSize: 16.0),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => UploadProducts(
-                                uploadPictureContainer:
-                                    this._productImageContainer)));
+                  onPressed: () async {
+                    final bool netConnectivityExist =
+                        await checkCurrentConnectivity();
 
-                    print('List is: ${this._productImageContainer}');
+                    netConnectivityExist
+                        ? await _saveProductData()
+                        : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                                "Net Connection Not Stable....Can't Save Product Details")));
                   },
                 ),
-              ),
-              SizedBox(
-                height: 30.0,
-              ),
-              textFormFieldForProduct(
-                  context: context,
-                  textEditingController: this._productDescription,
-                  labelText: 'Product Description',
-                  validator: (inputVal) {
-                    if (inputVal!.isEmpty)
-                      return "Product Description Can't be Empty";
-                    return null;
-                  },
-                  maxLines: 5),
-              SizedBox(
-                height: 30.0,
-              ),
-              textFormFieldForProduct(
-                  context: context,
-                  textEditingController: this._keyPoints,
-                  maxLines: 3,
-                  validator: (inputVal) {
-                    if (inputVal!.isEmpty) return "Key Points Can't be Empty";
-                    return null;
-                  },
-                  labelText: 'Key Points'),
-              SizedBox(
-                height: 30.0,
-              ),
-              textFormFieldForProduct(
-                  context: context,
-                  textEditingController: this._quantity,
-                  labelText: 'Total Products',
-                  validator: (inputVal) {
-                    if (inputVal!.isEmpty)
-                      return "Total Products Can't be Empty";
-                    return null;
-                  },
-                  textInputType: TextInputType.number),
-              SizedBox(
-                height: 10.0,
-              ),
-              _priceSection(),
-              SizedBox(
-                height: 20.0,
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: const Color.fromRGBO(4, 123, 213, 1),
-                ),
-                child: Text(
-                  'Upload Product Info',
-                  style: TextStyle(fontSize: 16.0),
-                ),
-                onPressed: () async {
-                  if (this._formKey.currentState!.validate()) {
-                    print('Validated');
-                    await _cloudDataStore.newProductDataStoreInFireStore(
-                        productName: this._productName.text,
-                        categoryName: this._mainCategoryName,
-                        subCategoryName: this._subCategoryName,
-                        actualPrice: this._actualPrice.text,
-                        discountPrice: this._discountPrice.text,
-                        productImagesLinks: [],
-                        productQuantity: this._quantity.text,
-                        productDescription: this._productDescription.text,
-                        productKeyPoints: this._keyPoints.text,
-                        priceCurrency: this._currency,
-                        storeAddress: widget.companyAddress,
-                        storeName: widget.companyName);
-                  }
-                },
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -365,5 +367,69 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
         ),
       ],
     );
+  }
+
+  Future<void> _saveProductData() async {
+    if (this._formKey.currentState!.validate()) {
+      print('Validated');
+
+      this._productImageContainer.length == 4
+          ? await _eligibleUpload()
+          : ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('All Product Images Not Uploaded'),
+            ));
+    }
+  }
+
+  Future<void> _eligibleUpload() async {
+    final List<String> _productLoadingImageUrl = [];
+
+    await Future.forEach(this._productImageContainer.values,
+        (localImagePath) async {
+      if (mounted) {
+        setState(() {
+          this._isLoading = true;
+        });
+      }
+      final String getDownloadUrl = await _cloudDataStore.uploadMediaToStorage(
+          File(localImagePath.toString()),
+          reference:
+              '${widget.companyName}/${this._mainCategoryName}/${this._subCategoryName}/${this._productName.text}/');
+      _productLoadingImageUrl.add(getDownloadUrl);
+    }).whenComplete(() async {
+      await _cloudDataStore.newProductDataStoreInFireStore(
+          productName: this._productName.text,
+          categoryName: this._mainCategoryName,
+          subCategoryName: this._subCategoryName,
+          actualPrice: this._actualPrice.text,
+          discountPrice: this._discountPrice.text,
+          productImagesLinks: _productLoadingImageUrl,
+          productQuantity: this._quantity.text,
+          productDescription: this._productDescription.text,
+          productKeyPoints: this._keyPoints.text,
+          priceCurrency: this._currency,
+          storeAddress: widget.companyAddress,
+          storeName: widget.companyName,
+          mainProductImageUrl: _productLoadingImageUrl[0]);
+
+      if (mounted) {
+        setState(() {
+          this._isLoading = false;
+        });
+      }
+    }).whenComplete(() {
+      Navigator.pop(context);
+
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            title: Center(child: Text('Congrats')),
+            content:
+            Text('Product Details Updated...\nYour Product is Live Now', textAlign: TextAlign.center, style: TextStyle(fontSize: 16.0),),
+          ));
+    });
   }
 }

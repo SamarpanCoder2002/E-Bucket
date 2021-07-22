@@ -58,6 +58,8 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
                       ),
                       TextButton(
                         onPressed: () async {
+
+
                           if (mounted) {
                             setState(() {
                               this._isLoading = true;

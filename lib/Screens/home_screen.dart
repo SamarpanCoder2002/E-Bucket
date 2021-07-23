@@ -1,4 +1,6 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
+import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -43,6 +45,90 @@ class _HomeScreenState extends State<HomeScreen> {
     'Jewellery',
   ];
 
+  final Map<String, dynamic> _productMap = {};
+  final List<String> _searchKeyword = [];
+
+  String? _searchedKeyWord = '';
+  bool _searchClearButton = false;
+
+  final CloudDataStore _cloudDataStore = CloudDataStore();
+
+  _getAllCategoryAndSubCategory() async {
+    final Map<String, dynamic> _categoryAndSubCategoryCollection =
+        await _cloudDataStore.allCategoryFetch();
+
+    _categoryAndSubCategoryCollection.forEach((mainCategory, subCategoryList) {
+      subCategoryList.forEach((subCategory) {
+        if (mounted) {
+          setState(() {
+            this._productMap.addAll({
+              subCategory: mainCategory,
+            });
+            this._searchKeyword.add(subCategory);
+          });
+        }
+      });
+    });
+
+    if (mounted) {
+      setState(() {
+        this._searchKeyword.sort();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _getAllCategoryAndSubCategory();
+    super.initState();
+  }
+
+  Widget _dropDownSearch() {
+    return DropdownSearch<String>(
+      mode: Mode.BOTTOM_SHEET,
+      maxHeight: MediaQuery.of(context).size.height - 300,
+      showSelectedItem: true,
+      items: this._searchKeyword,
+      hint: "Search in E-Bucket",
+      popupItemDisabled: (String s) => s.startsWith('I'),
+      onChanged: (clickedSearchKeyword) {
+        if (mounted) {
+          setState(() {
+            this._searchedKeyWord = clickedSearchKeyword;
+            this._searchClearButton = true;
+          });
+        }
+      },
+      showAsSuffixIcons: true,
+      dropdownBuilderSupportsNullItem: true,
+      showClearButton: this._searchClearButton,
+      showSearchBox: true,
+      autoFocusSearchBox: true,
+      emptyBuilder: (_, __) {
+        return Scaffold(
+            body: Center(
+          child: Text(
+            'Sorry, not Found',
+            style: TextStyle(fontSize: 30.0, color: Colors.red),
+          ),
+        ));
+      },
+      clearButtonBuilder: (_) {
+        return IconButton(
+          icon: Icon(Icons.clear),
+          onPressed: () {
+            if (mounted) {
+              setState(() {
+                this._searchedKeyWord = '';
+                this._searchClearButton = false;
+              });
+            }
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return CommonProductScreen(
@@ -57,39 +143,31 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(5.0),
             ),
-            child: TextField(
-              decoration: InputDecoration(
-                suffixIcon: Icon(
-                  Icons.search_outlined,
-                  size: 20.0,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white),
+            child: _dropDownSearch(),
+          ),
+        ),
+        body: this._searchedKeyWord != ''
+            ? Center()
+            : Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.white,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    _categoryOption(),
+                    _autoSlider(),
+
+                    ///_storiesSection(),
+                    _interestedSection(),
+                    _topDiscountSection(),
+                    _popularPicks(),
+                    SizedBox(
+                      height: 20.0,
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
-        ),
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          color: Colors.white,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              _categoryOption(),
-              _autoSlider(),
-              _storiesSection(),
-              _interestedSection(),
-              _topDiscountSection(),
-              _popularPicks(),
-              SizedBox(height: 20.0,),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -144,43 +222,43 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _storiesSection() {
-    return Container(
-      margin: EdgeInsets.only(top: 15.0, left: 5.0),
-      width: MediaQuery.of(context).size.width,
-      height: 85.0 + 40.0,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Container(
-              alignment: Alignment.centerLeft,
-              padding: EdgeInsets.only(left: 10.0),
-              child: Text(
-                'Stories',
-                style: TextStyle(fontSize: 18.0),
-              )),
-          Container(
-            padding: EdgeInsets.only(left: 10.0, right: 10.0),
-            width: MediaQuery.of(context).size.width,
-            height: 100.0,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 20.0),
-                  child: CircleAvatar(
-                    radius: 40.0,
-                    backgroundColor: Colors.black12,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _storiesSection() {
+  //   return Container(
+  //     margin: EdgeInsets.only(top: 15.0, left: 5.0),
+  //     width: MediaQuery.of(context).size.width,
+  //     height: 85.0 + 40.0,
+  //     child: Column(
+  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //       children: [
+  //         Container(
+  //             alignment: Alignment.centerLeft,
+  //             padding: EdgeInsets.only(left: 10.0),
+  //             child: Text(
+  //               'Stories',
+  //               style: TextStyle(fontSize: 18.0),
+  //             )),
+  //         Container(
+  //           padding: EdgeInsets.only(left: 10.0, right: 10.0),
+  //           width: MediaQuery.of(context).size.width,
+  //           height: 100.0,
+  //           child: ListView.builder(
+  //             scrollDirection: Axis.horizontal,
+  //             itemCount: 10,
+  //             itemBuilder: (context, index) {
+  //               return Padding(
+  //                 padding: const EdgeInsets.only(right: 20.0),
+  //                 child: CircleAvatar(
+  //                   radius: 40.0,
+  //                   backgroundColor: Colors.black12,
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _interestedSection() {
     return Container(
@@ -287,6 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: MediaQuery.of(context).size.width,
       height: 470,
+
       ///color: Colors.red,
       margin: EdgeInsets.only(top: 15.0),
       padding: EdgeInsets.only(left: 15.0, right: 15.0, top: 5.0),
@@ -322,16 +401,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     secondBlockImageCaption: 'Smart Watch'),
                 productImageDivider(
                     firstBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Canon-EOS-250D-DSLR-Camera-with-18-55mm-IS-STM-Lens-2-Black.jpg?alt=media&token=bf6eabb4-8a66-492a-b6b9-e244d9893964',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Canon-EOS-250D-DSLR-Camera-with-18-55mm-IS-STM-Lens-2-Black.jpg?alt=media&token=bf6eabb4-8a66-492a-b6b9-e244d9893964',
                     secondBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/glider-football-500x500.jpg?alt=media&token=6db85caf-5190-436c-bf04-e3a9ebc0a824',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/glider-football-500x500.jpg?alt=media&token=6db85caf-5190-436c-bf04-e3a9ebc0a824',
                     firstBlockImageCaption: 'Camera',
                     secondBlockImageCaption: 'Football'),
                 productImageDivider(
                     firstBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41a0powQqYL.jpg?alt=media&token=7d9a16fa-6fef-46f1-9d30-434a16e020bb',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41a0powQqYL.jpg?alt=media&token=7d9a16fa-6fef-46f1-9d30-434a16e020bb',
                     secondBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/wooden-cupboard-500x500.jpg?alt=media&token=4634c69f-8d15-4f3a-89d7-05ac66dbf344',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/wooden-cupboard-500x500.jpg?alt=media&token=4634c69f-8d15-4f3a-89d7-05ac66dbf344',
                     firstBlockImageCaption: 'Binocular',
                     secondBlockImageCaption: 'WarDrobe'),
               ],
@@ -366,17 +445,17 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 productImageDivider(
                   firstBlockImageUrl:
-                  'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/3103miMj8mL.jpg?alt=media&token=7d0754e3-dc9c-4c0f-a0b0-68559b35eaa0',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/3103miMj8mL.jpg?alt=media&token=7d0754e3-dc9c-4c0f-a0b0-68559b35eaa0',
                   secondBlockImageUrl:
-                  'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/fc7a09d8ab8bb854f93f956b4d76ee1b.jpg?alt=media&token=9cc34b28-353c-4c68-acfc-ba46ba0a531c',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/fc7a09d8ab8bb854f93f956b4d76ee1b.jpg?alt=media&token=9cc34b28-353c-4c68-acfc-ba46ba0a531c',
                   firstBlockImageCaption: 'IPhone',
                   secondBlockImageCaption: 'Headset',
                 ),
                 productImageDivider(
                     firstBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/rgb-gaming-desktop-500x500.jpg?alt=media&token=36d9d714-3f0b-4a03-a3b7-604ff4cca1b3',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/rgb-gaming-desktop-500x500.jpg?alt=media&token=36d9d714-3f0b-4a03-a3b7-604ff4cca1b3',
                     secondBlockImageUrl:
-                    'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/echo-show-8-500x500.jpg?alt=media&token=eb4b41cf-8308-4fc8-85c8-885ca072199f',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/echo-show-8-500x500.jpg?alt=media&token=eb4b41cf-8308-4fc8-85c8-885ca072199f',
                     firstBlockImageCaption: 'Gaming Computer',
                     secondBlockImageCaption: 'Amazon Alexa'),
               ],

@@ -58,8 +58,6 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
                       ),
                       TextButton(
                         onPressed: () async {
-
-
                           if (mounted) {
                             setState(() {
                               this._isLoading = true;
@@ -87,7 +85,8 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (_) => SellProductAsSeller(
-                                          companyName: storeNameAndAddress![0].toString(),
+                                          companyName: storeNameAndAddress![0]
+                                              .toString(),
                                           companyAddress:
                                               storeNameAndAddress[1].toString(),
                                         )));

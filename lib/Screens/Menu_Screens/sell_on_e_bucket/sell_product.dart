@@ -2,12 +2,13 @@ import 'dart:io';
 
 import 'package:currency_picker/currency_picker.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
-import 'package:e_bucket/Screens/Menu_Screens/common_textfield_for_upload_new_product.dart';
-import 'package:e_bucket/Screens/Menu_Screens/upload_product_screen.dart';
+import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/common_textfield_for_upload_new_product.dart';
+import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/upload_product_screen.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:e_bucket/global_uses/net_connectivity_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:loading_overlay/loading_overlay.dart';
 
 class SellProductAsSeller extends StatefulWidget {
@@ -111,6 +112,7 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
                       style: TextStyle(fontSize: 16.0),
                     ),
                     onPressed: () {
+                      SystemChannels.textInput.invokeMethod('TextInput.hide');
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -176,6 +178,8 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
                     style: TextStyle(fontSize: 16.0),
                   ),
                   onPressed: () async {
+                    SystemChannels.textInput.invokeMethod('TextInput.hide');
+
                     final bool netConnectivityExist =
                         await checkCurrentConnectivity();
 
@@ -398,19 +402,19 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
       _productLoadingImageUrl.add(getDownloadUrl);
     }).whenComplete(() async {
       await _cloudDataStore.newProductDataStoreInFireStore(
-          productName: this._productName.text,
-          categoryName: this._mainCategoryName,
-          subCategoryName: this._subCategoryName,
-          actualPrice: this._actualPrice.text,
-          discountPrice: this._discountPrice.text,
-          productImagesLinks: _productLoadingImageUrl,
-          productQuantity: this._quantity.text,
-          productDescription: this._productDescription.text,
-          productKeyPoints: this._keyPoints.text,
-          priceCurrency: this._currency,
-          storeAddress: widget.companyAddress,
-          storeName: widget.companyName,
-          mainProductImageUrl: _productLoadingImageUrl[0]);
+          productNameLocal: this._productName.text,
+          categoryNameLocal: this._mainCategoryName,
+          subCategoryNameLocal: this._subCategoryName,
+          actualPriceLocal: this._actualPrice.text,
+          discountPriceLocal: this._discountPrice.text,
+          productImagesLinksLocal: _productLoadingImageUrl,
+          productQuantityLocal: this._quantity.text,
+          productDescriptionLocal: this._productDescription.text,
+          productKeyPointsLocal: this._keyPoints.text,
+          priceCurrencyLocal: this._currency,
+          storeAddressLocal: widget.companyAddress,
+          storeNameLocal: widget.companyName,
+          mainProductImageUrlLocal: _productLoadingImageUrl[0]);
 
       if (mounted) {
         setState(() {

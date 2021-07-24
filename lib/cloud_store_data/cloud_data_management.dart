@@ -4,30 +4,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+import 'package:e_bucket/global_uses/product_details.dart';
+
 class CloudDataStore {
   final String _consumerPath = 'consumers';
   final String _sellerPath = 'sellers';
   final String _categoryPath = 'category';
-  final String _productName = 'ProductName';
 
   final String _storeName = 'StoreName';
   final String _storeAddress = 'StoreAddress';
-
-  final String _productMainCategory = 'ProductMainCategory';
-  final String _productSubCategory = 'ProductSubCategory';
-  final String _productImagesLink = 'ProductImagesLinks';
-  final String _productDescription = 'ProductDescription';
-  final String _productKeyPoints = 'ProductKeyPoints';
-  final String _productQuantity = 'TotalProducts';
-  final String _productActualPrice = 'ProductActualPrice';
-  final String _priceCurrency = 'Currency';
-  final String _productDiscountPrice = 'ProductDiscountPrice';
-  final String _productMainImageUrl = 'ProductMainImageUrl';
 
   Future<void> dataStoreForConsumers(String email) async {
     try {
       await FirebaseFirestore.instance.doc('$_consumerPath/$email').set({
         'email': '$email',
+        'cart': '0',
+        'orders': [],
       });
     } catch (e) {
       print('Data Store For Consumers Error: ${e.toString()}');
@@ -82,47 +74,47 @@ class CloudDataStore {
   }
 
   Future<bool> newProductDataStoreInFireStore({
-    required String productName,
-    required String categoryName,
-    required String subCategoryName,
-    required String actualPrice,
-    required String discountPrice,
-    required List<String> productImagesLinks,
-    required String productQuantity,
-    required String productDescription,
-    required String productKeyPoints,
-    required String priceCurrency,
-    required String storeName,
-    required String storeAddress,
-    required String mainProductImageUrl,
+    required String productNameLocal,
+    required String categoryNameLocal,
+    required String subCategoryNameLocal,
+    required String actualPriceLocal,
+    required String discountPriceLocal,
+    required List<String> productImagesLinksLocal,
+    required String productQuantityLocal,
+    required String productDescriptionLocal,
+    required String productKeyPointsLocal,
+    required String priceCurrencyLocal,
+    required String storeNameLocal,
+    required String storeAddressLocal,
+    required String mainProductImageUrlLocal,
   }) async {
     try {
       final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
           await FirebaseFirestore.instance
-              .doc('$categoryName/$subCategoryName')
+              .doc('$categoryNameLocal/$subCategoryNameLocal')
               .get();
       print('DocumentSnapShot is: ${documentSnapshot.data()}');
 
       if (documentSnapshot.data() == null) {
         /// Specific Category Not Present
         await FirebaseFirestore.instance
-            .doc('$categoryName/$subCategoryName')
+            .doc('$categoryNameLocal/$subCategoryNameLocal')
             .set({
-          storeName: [
+          storeNameLocal: [
             {
-              this._productName: productName,
-              this._productMainCategory: categoryName,
-              this._productSubCategory: subCategoryName,
-              this._productImagesLink: productImagesLinks,
-              this._productDescription: productDescription,
-              this._productKeyPoints: productKeyPoints,
-              this._productQuantity: productQuantity,
-              this._priceCurrency: priceCurrency,
-              this._productActualPrice: actualPrice,
-              this._productDiscountPrice: discountPrice,
-              this._storeName: storeName,
-              this._storeAddress: storeAddress,
-              this._productMainImageUrl: mainProductImageUrl,
+              productName: productNameLocal,
+              productMainCategory: categoryNameLocal,
+              productSubCategory: subCategoryNameLocal,
+              productImagesLink: productImagesLinksLocal,
+              productDescription: productDescriptionLocal,
+              productKeyPoints: productKeyPointsLocal,
+              productQuantity: productQuantityLocal,
+              priceCurrency: priceCurrencyLocal,
+              productActualPrice: actualPriceLocal,
+              productDiscountPrice: discountPriceLocal,
+              productMainImageUrl: mainProductImageUrlLocal,
+              this._storeName: storeNameLocal,
+              this._storeAddress: storeAddressLocal,
             }
           ]
         }).whenComplete(() => print('Completed Firestore Uplaod'));
@@ -131,30 +123,30 @@ class CloudDataStore {
         print('take');
         final DocumentSnapshot<Map<String, dynamic>> allProducts =
             await FirebaseFirestore.instance
-                .doc('$categoryName/$subCategoryName')
+                .doc('$categoryNameLocal/$subCategoryNameLocal')
                 .get();
-        List<dynamic>? storeAll = allProducts.data()![storeName];
+        List<dynamic>? storeAll = allProducts.data()![storeNameLocal];
 
         if (storeAll == null) {
           /// Store Not Present
           final Map<String, dynamic>? tempMap = documentSnapshot.data();
 
           tempMap!.addAll({
-            storeName: [
+            storeNameLocal: [
               {
-                this._productName: productName,
-                this._productMainCategory: categoryName,
-                this._productSubCategory: subCategoryName,
-                this._productImagesLink: productImagesLinks,
-                this._productDescription: productDescription,
-                this._productKeyPoints: productKeyPoints,
-                this._productQuantity: productQuantity,
-                this._priceCurrency: priceCurrency,
-                this._productActualPrice: actualPrice,
-                this._productDiscountPrice: discountPrice,
-                this._storeName: storeName,
-                this._storeAddress: storeAddress,
-                this._productMainImageUrl: mainProductImageUrl,
+                productName: productNameLocal,
+                productMainCategory: categoryNameLocal,
+                productSubCategory: subCategoryNameLocal,
+                productImagesLink: productImagesLinksLocal,
+                productDescription: productDescriptionLocal,
+                productKeyPoints: productKeyPointsLocal,
+                productQuantity: productQuantityLocal,
+                priceCurrency: priceCurrencyLocal,
+                productActualPrice: actualPriceLocal,
+                productDiscountPrice: discountPriceLocal,
+                this._storeName: storeNameLocal,
+                this._storeAddress: storeAddressLocal,
+                productMainImageUrl: mainProductImageUrlLocal,
               }
             ]
           });
@@ -162,8 +154,9 @@ class CloudDataStore {
           print('tempMAp: $tempMap');
 
           await FirebaseFirestore.instance
-              .doc('$categoryName/$subCategoryName')
-              .update(tempMap).whenComplete(() => print('Completed'));
+              .doc('$categoryNameLocal/$subCategoryNameLocal')
+              .update(tempMap)
+              .whenComplete(() => print('Completed'));
         } else {
           /// Store Name Present
           print('Store All : $storeAll');
@@ -171,7 +164,7 @@ class CloudDataStore {
           int fieldMatchingIndex = -1;
 
           storeAll.forEach((field) {
-            if (field[this._productName].toString() == productName) {
+            if (field[productName].toString() == productName) {
               _productNameSame = true;
               fieldMatchingIndex = storeAll.indexOf(field);
             }
@@ -182,31 +175,31 @@ class CloudDataStore {
             /// Same Product Name PResent
             print('Product Name Same');
 
-            allStoreCollection![storeName].removeAt(fieldMatchingIndex);
+            allStoreCollection![storeNameLocal].removeAt(fieldMatchingIndex);
           }
 
-          print(allStoreCollection![storeName]);
+          print(allStoreCollection![storeNameLocal]);
 
-          allStoreCollection[storeName].add({
-            this._productName: productName,
-            this._productMainCategory: categoryName,
-            this._productSubCategory: subCategoryName,
-            this._productImagesLink: productImagesLinks,
-            this._productDescription: productDescription,
-            this._productKeyPoints: productKeyPoints,
-            this._productQuantity: productQuantity,
-            this._priceCurrency: priceCurrency,
-            this._productActualPrice: actualPrice,
-            this._productDiscountPrice: discountPrice,
-            this._storeName: storeName,
-            this._storeAddress: storeAddress,
-            this._productMainImageUrl: mainProductImageUrl,
+          allStoreCollection[storeNameLocal].add({
+            productName: productNameLocal,
+            productMainCategory: categoryNameLocal,
+            productSubCategory: subCategoryNameLocal,
+            productImagesLink: productImagesLinksLocal,
+            productDescription: productDescriptionLocal,
+            productKeyPoints: productKeyPointsLocal,
+            productQuantity: productQuantityLocal,
+            priceCurrency: priceCurrencyLocal,
+            productActualPrice: actualPriceLocal,
+            productDiscountPrice: discountPriceLocal,
+            this._storeName: storeNameLocal,
+            this._storeAddress: storeAddressLocal,
+            productMainImageUrl: mainProductImageUrlLocal,
           });
 
           print('All Store Collection: $allStoreCollection');
 
           await FirebaseFirestore.instance
-              .doc('$categoryName/$subCategoryName')
+              .doc('$categoryNameLocal/$subCategoryNameLocal')
               .set(allStoreCollection)
               .whenComplete(() => print('Completed'));
         }
@@ -261,5 +254,18 @@ class CloudDataStore {
       print('Error in Get Store Name and Address: ${e.toString()}');
       return [];
     }
+  }
+
+  Future<Map<String, dynamic>?> getAllThings(
+      {required String mainCategory, required String subCategory}) async {
+    print('Main Category: $mainCategory');
+    print('Sub Category: $subCategory');
+    final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+        await FirebaseFirestore.instance
+            .doc('$mainCategory/$subCategory')
+            .get();
+
+    /// print(documentSnapshot.data());
+    return documentSnapshot.data();
   }
 }

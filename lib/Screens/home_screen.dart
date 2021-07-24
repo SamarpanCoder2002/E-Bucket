@@ -1,9 +1,14 @@
+import 'package:animations/animations.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
+import 'package:e_bucket/Screens/product_related/product_details_show.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
+import 'package:e_bucket/global_uses/product_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:loading_overlay/loading_overlay.dart';
+import 'package:photo_view/photo_view.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -47,6 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final Map<String, dynamic> _productMap = {};
   final List<String> _searchKeyword = [];
+  List<dynamic> _findProducts = [];
+
+  bool _isLoading = false;
 
   String? _searchedKeyWord = '';
   bool _searchClearButton = false;
@@ -77,10 +85,42 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void initState() {
-    _getAllCategoryAndSubCategory();
-    super.initState();
+  _makeSearchableKeyword(String? clickedSearchKeyword) async {
+    if (mounted) {
+      setState(() {
+        this._isLoading = true;
+        this._searchedKeyWord = clickedSearchKeyword;
+        this._searchClearButton = true;
+      });
+    }
+    final Map<String, dynamic>? take = await _cloudDataStore.getAllThings(
+        mainCategory: this._productMap[clickedSearchKeyword.toString()],
+        subCategory: clickedSearchKeyword.toString());
+
+    if (mounted) {
+      setState(() {
+        if (this._findProducts.isNotEmpty) this._findProducts.clear();
+      });
+    }
+
+    if (take == null) {
+      print("That's null");
+    } else {
+      List<dynamic> listValues = take.values.toList()[0];
+      if (mounted) {
+        setState(() {
+          this._findProducts = listValues;
+        });
+      }
+
+      print(this._findProducts);
+    }
+
+    if (mounted) {
+      setState(() {
+        this._isLoading = false;
+      });
+    }
   }
 
   Widget _dropDownSearch() {
@@ -91,14 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
       items: this._searchKeyword,
       hint: "Search in E-Bucket",
       popupItemDisabled: (String s) => s.startsWith('I'),
-      onChanged: (clickedSearchKeyword) {
-        if (mounted) {
-          setState(() {
-            this._searchedKeyWord = clickedSearchKeyword;
-            this._searchClearButton = true;
-          });
-        }
-      },
+      onChanged: _makeSearchableKeyword,
       showAsSuffixIcons: true,
       dropdownBuilderSupportsNullItem: true,
       showClearButton: this._searchClearButton,
@@ -130,44 +163,54 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void initState() {
+    _getAllCategoryAndSubCategory();
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return CommonProductScreen(
-      elevation: 0.0,
-      body: Scaffold(
-        appBar: AppBar(
-          elevation: 0.0,
-          backgroundColor: const Color.fromRGBO(4, 123, 213, 1),
-          flexibleSpace: Container(
-            margin: EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(5.0),
+    return LoadingOverlay(
+      isLoading: this._isLoading,
+      child: CommonProductScreen(
+        elevation: 0.0,
+        body: Scaffold(
+          appBar: AppBar(
+            elevation: 0.0,
+            backgroundColor: const Color.fromRGBO(4, 123, 213, 1),
+            flexibleSpace: Container(
+              margin: EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              child: _dropDownSearch(),
             ),
-            child: _dropDownSearch(),
+          ),
+          body: Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            color: Colors.white,
+            padding: EdgeInsets.all(this._searchedKeyWord != '' ? 12.0 : 0.0),
+            child: this._searchedKeyWord != ''
+                ? _uponProductSearch()
+                : ListView(
+                    shrinkWrap: true,
+                    children: [
+                      _categoryOption(),
+                      _autoSlider(),
+
+                      ///_storiesSection(),
+                      _interestedSection(),
+                      _topDiscountSection(),
+                      _popularPicks(),
+                      SizedBox(
+                        height: 20.0,
+                      ),
+                    ],
+                  ),
           ),
         ),
-        body: this._searchedKeyWord != ''
-            ? Center()
-            : Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                color: Colors.white,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    _categoryOption(),
-                    _autoSlider(),
-
-                    ///_storiesSection(),
-                    _interestedSection(),
-                    _topDiscountSection(),
-                    _popularPicks(),
-                    SizedBox(
-                      height: 20.0,
-                    ),
-                  ],
-                ),
-              ),
       ),
     );
   }
@@ -325,9 +368,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: double.maxFinite / 2,
                   height: (270 - 10) / 2 - 30,
-                  child: Image.network(
-                    firstBlockImageUrl,
+                  child: PhotoView(
+                    imageProvider: NetworkImage(firstBlockImageUrl),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorBuilder: (context, obj, stackTrace) => Center(
+                        child: Text(
+                      'X',
+                      style: TextStyle(
+                        fontSize: 40.0,
+                        color: Colors.red,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                      ),
+                    )),
+                    enableRotation: false,
+                    backgroundDecoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    //minScale: PhotoViewComputedScale.covered,
                   ),
+
+                  // Image.network(
+                  //   firstBlockImageUrl,
+                  // ),
                 ),
                 Text(firstBlockImageCaption),
               ],
@@ -348,8 +413,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: double.maxFinite / 2,
                   height: (270 - 10) / 2 - 30,
-                  child: Image.network(
-                    secondBlockImageUrl,
+                  child: PhotoView(
+                    imageProvider: NetworkImage(secondBlockImageUrl),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorBuilder: (context, obj, stackTrace) => Center(
+                        child: Text(
+                      'X',
+                      style: TextStyle(
+                        fontSize: 40.0,
+                        color: Colors.red,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                      ),
+                    )),
+                    enableRotation: false,
+                    backgroundDecoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    //minScale: PhotoViewComputedScale.covered,
                   ),
                 ),
                 Text(secondBlockImageCaption),
@@ -464,5 +547,143 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _uponProductSearch() {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: this._findProducts.length,
+      itemBuilder: (itemContext, index) {
+        print(this._findProducts);
+        return OpenContainer(
+          closedColor: Colors.white,
+          middleColor: Colors.white,
+          openColor: Colors.white,
+          closedElevation: 0.0,
+          transitionDuration: Duration(milliseconds: 500),
+          openBuilder: (openBuilderContext, openWidget) => ProductDetailsShow(productDetails: this._findProducts[index]),
+          closedBuilder: (closeBuilderContext, closeWidget) => Container(
+            width: double.maxFinite,
+            height: 140.0,
+            margin: EdgeInsets.only(bottom: 10.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 3,
+                  child: PhotoView(
+                    imageProvider: NetworkImage(
+                        this._findProducts[index]['ProductMainImageUrl']),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorBuilder: (context, obj, stackTrace) => Center(
+                        child: Text(
+                      'X',
+                      style: TextStyle(
+                        fontSize: 40.0,
+                        color: Colors.red,
+                        fontFamily: 'Lora',
+                        letterSpacing: 1.0,
+                      ),
+                    )),
+                    enableRotation: false,
+                    backgroundDecoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    //minScale: PhotoViewComputedScale.covered,
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Text(
+                          _getProductTitle(
+                              this._findProducts[index]['ProductName']),
+                          textAlign: TextAlign.justify,
+                          style: TextStyle(
+                              fontSize: 14.0, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            bottom: 12.0, left: 12.0, right: 12.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${_getMinimumPrice(index)}${this._findProducts[index]['Currency']}',
+                              style: TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Text(
+                              this
+                                  ._findProducts[index]['ProductActualPrice']
+                                  .toString(),
+                              style: TextStyle(
+                                  fontSize: 12.0,
+                                  decoration: TextDecoration.lineThrough,
+                                  color: Colors.black45,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(
+                              width: 10.0,
+                            ),
+                            Expanded(
+                                child: Text(
+                              '${_getDiscountPercentage(index)}% Off',
+                              style: TextStyle(
+                                  fontSize: 12.0,
+                                  color: Colors.black45,
+                                  fontWeight: FontWeight.w500),
+                            )),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _getProductTitle(String productTitle) {
+    if (productTitle.split(" ").length >= 16) {
+      final List<String> afterSplitting = productTitle.split(" ");
+      afterSplitting.replaceRange(16, afterSplitting.length, ['...']);
+      final String afterModified = afterSplitting.join(" ");
+      return afterModified;
+    }
+    return productTitle;
+  }
+
+  int _getMinimumPrice(int index) => (double.parse(
+              this._findProducts[index]['ProductActualPrice'].toString()) -
+          double.parse(
+              this._findProducts[index]['ProductDiscountPrice'].toString()))
+      .toInt();
+
+  String _getDiscountPercentage(int index) {
+    final double savePercentage = double.parse(((double.parse(this
+                    ._findProducts[index][productDiscountPrice]
+                    .toString()) /
+                double.parse(
+                    this._findProducts[index][productActualPrice].toString())) *
+            100.0)
+        .toStringAsFixed(1));
+
+    if (int.parse(savePercentage.toString().split('.')[1]) > 0)
+      return savePercentage.toString();
+    return savePercentage.toString().split('.')[0];
   }
 }

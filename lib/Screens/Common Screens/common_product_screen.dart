@@ -1,5 +1,5 @@
-import 'package:e_bucket/Screens/Menu_Screens/sell_product.dart';
-import 'package:e_bucket/Screens/Menu_Screens/seller_new_profile_create.dart';
+import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/sell_product.dart';
+import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/seller_new_profile_create.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

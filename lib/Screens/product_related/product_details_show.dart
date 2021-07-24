@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
 import 'package:e_bucket/global_uses/product_details.dart';
 import 'package:flutter/material.dart';
@@ -5,21 +6,91 @@ import 'package:flutter/cupertino.dart';
 import 'package:photo_view/photo_view.dart';
 
 class ProductDetailsShow extends StatefulWidget {
-  final Map<String,dynamic> productDetails;
+  final Map<String, dynamic> productDetails;
 
-  ProductDetailsShow({Key? key, required this.productDetails}) : super(key: key);
+  ProductDetailsShow({Key? key, required this.productDetails})
+      : super(key: key);
 
   @override
   _ProductDetailsShowState createState() => _ProductDetailsShowState();
 }
 
 class _ProductDetailsShowState extends State<ProductDetailsShow> {
+  List<dynamic> _productImages = [];
+  String _dropDownText = 'Qty: 1';
+
+  _productSlider() {
+    if (mounted) {
+      setState(() {
+        this._productImages = widget.productDetails[productImagesLink];
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    _productSlider();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     print(widget.productDetails);
     return CommonProductScreen(
       elevation: 5.0,
       pageTitle: 'E-Bucket',
+      bottomWidget: Container(
+        height: 45.0,
+        decoration: BoxDecoration(
+          color: Colors.red,
+          boxShadow: [
+            BoxShadow(blurRadius: 3.0, color: Colors.grey),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: SizedBox(
+                height: 100.0,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    elevation: 10.0,
+                    backgroundColor: Colors.white,
+                    shadowColor: Colors.black45,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.0),
+                    ),
+                  ),
+                  child: Text(
+                    'Add to Cart',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+            Expanded(
+              child: SizedBox(
+                height: 100.0,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    elevation: 10.0,
+                    backgroundColor: Theme.of(context).accentColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(0.0),
+                    ),
+                  ),
+                  child: Text(
+                    'Buy Now',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  onPressed: () {},
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -27,41 +98,281 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
         child: ListView(
           shrinkWrap: true,
           children: [
-            Container(
-              width: double.maxFinite,
-              height: MediaQuery.of(context).size.height * (1/7),
-              color: Colors.red,
-              child: Center(),
-            ),
-            Container(
-              height: MediaQuery.of(context).size.height/2,
-              width: MediaQuery.of(context).size.width-24,
-              margin: EdgeInsets.only(top: 30.0),
-              child: PhotoView(
-                imageProvider: NetworkImage(
-                    widget.productDetails[productMainImageUrl]),
-                loadingBuilder: (context, event) => Center(
-                  child: CircularProgressIndicator(),
-                ),
-                errorBuilder: (context, obj, stackTrace) => Center(
-                    child: Text(
-                      'X',
-                      style: TextStyle(
-                        fontSize: 40.0,
-                        color: Colors.red,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
-                      ),
-                    )),
-                enableRotation: false,
-                backgroundDecoration: BoxDecoration(
-                  color: Colors.white,
-                ),
-                //minScale: PhotoViewComputedScale.covered,
-              ),
+            _productTitle(),
+            _productImageSlide(),
+            _productPriceDetails(),
+            _productQuantity(),
+            _productSellerName(),
+            _productDetails(),
+            _productKeyPoints(),
+            SizedBox(
+              height: 50.0,
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _productTitle() {
+    return SizedBox(
+      width: double.maxFinite,
+      height: MediaQuery.of(context).size.height * (1 / 6),
+      child: Text(
+        widget.productDetails[productName],
+        textAlign: TextAlign.justify,
+        style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  Widget _productImageSlide() {
+    return Stack(
+      children: [
+        CarouselSlider.builder(
+            options: CarouselOptions(
+              autoPlay: true,
+              height: MediaQuery.of(context).size.height / 2.5,
+              autoPlayCurve: Curves.fastOutSlowIn,
+              enlargeCenterPage: true,
+              enableInfiniteScroll: true,
+              autoPlayAnimationDuration: Duration(milliseconds: 1500),
+              viewportFraction: 0.8,
+            ),
+            itemCount: this._productImages.length,
+            itemBuilder: (sliderContext, itemIndex, realIndex) => Container(
+                  height: MediaQuery.of(context).size.height / 2.5,
+                  width: MediaQuery.of(context).size.width - 24,
+                  margin: EdgeInsets.only(top: 30.0),
+                  child: PhotoView(
+                    imageProvider: NetworkImage(
+                        widget.productDetails[productImagesLink][itemIndex]),
+                    loadingBuilder: (context, event) => Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                    errorBuilder: (context, obj, stackTrace) => Center(
+                      child: Image.asset(
+                        'assets/images/error_image.jpg',
+                        width: 300,
+                      ),
+                    ),
+                    enableRotation: false,
+                    backgroundDecoration: BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    //minScale: PhotoViewComputedScale.covered,
+                  ),
+                )),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 45.0,
+              height: 45.0,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red,
+              ),
+              child: Text(
+                '${_getDiscountPercentage()}%\nOff',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12.0),
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.share_outlined,
+                size: 30.0,
+              ),
+              onPressed: () {},
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _productPriceDetails() {
+    return Container(
+      width: MediaQuery.of(context).size.width - 40,
+      height: 60.0,
+      margin: EdgeInsets.only(top: 30.0),
+      //color: Colors.red,
+      alignment: Alignment.topLeft,
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              '${_getMinimumPrice()} ${widget.productDetails[priceCurrency]}',
+              style: TextStyle(
+                fontSize: 25.0,
+              ),
+            ),
+          ),
+          Align(
+              alignment: Alignment.topLeft,
+              child: Row(
+                children: [
+                  Text(
+                    'MRP: ',
+                    style: TextStyle(color: Colors.black45),
+                  ),
+                  Text(
+                    '${widget.productDetails[productActualPrice]} ${widget.productDetails[priceCurrency]}',
+                    style: TextStyle(
+                        fontSize: 14.0,
+                        decoration: TextDecoration.lineThrough,
+                        color: Colors.black45),
+                  ),
+                  Text(
+                    '       Save ${widget.productDetails[productDiscountPrice]} ${widget.productDetails[priceCurrency]}',
+                    style: TextStyle(
+                        color: Colors.red, fontStyle: FontStyle.italic),
+                  ),
+                ],
+              )),
+        ],
+      ),
+    );
+  }
+
+  int _getMinimumPrice() => (double.parse(
+              widget.productDetails[productActualPrice].toString()) -
+          double.parse(widget.productDetails[productDiscountPrice].toString()))
+      .toInt();
+
+  String _getDiscountPercentage() {
+    final double savePercentage = double.parse(
+        ((double.parse(widget.productDetails[productDiscountPrice].toString()) /
+                    double.parse(
+                        widget.productDetails[productActualPrice].toString())) *
+                100.0)
+            .toStringAsFixed(1));
+
+    if (int.parse(savePercentage.toString().split('.')[1]) > 0)
+      return savePercentage.toString();
+    return savePercentage.toString().split('.')[0];
+  }
+
+  Widget _productQuantity() {
+    return Container(
+      height: 40.0,
+      margin: EdgeInsets.only(
+          right: MediaQuery.of(context).size.width / 1.5, top: 10.0),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          backgroundColor: Theme.of(context).backgroundColor,
+          side: BorderSide(width: 0.5, color: Colors.grey),
+          shadowColor: Colors.grey,
+        ),
+        onPressed: () {},
+        child: DropdownButton<String>(
+          elevation: 16,
+          style: const TextStyle(fontSize: 16.0, color: Colors.black),
+          icon: Icon(
+            Icons.arrow_drop_down_outlined,
+            size: 30.0,
+            color: Colors.black,
+          ),
+          underline: Container(
+            color: Colors.red,
+          ),
+          value: this._dropDownText,
+          onChanged: (String? newValue) async {
+            if (mounted) {
+              setState(() {
+                this._dropDownText = newValue.toString();
+              });
+            }
+          },
+          items: ['Qty: 1', 'Qty: 2', 'Qty: 3', 'Qty: 4', 'Qty: 5']
+              .map<DropdownMenuItem<String>>((String value) {
+            return DropdownMenuItem<String>(
+              value: value,
+              child: Text(
+                value,
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _productSellerName() {
+    return Container(
+      width: MediaQuery.of(context).size.width - 40,
+      margin: EdgeInsets.only(top: 20.0),
+      alignment: Alignment.topLeft,
+      child: Row(
+        children: [
+          Text('Sold by '),
+          Text(
+            '${widget.productDetails[storeName]}',
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _productDetails() {
+    return Container(
+      width: MediaQuery.of(context).size.width - 40,
+      margin: EdgeInsets.only(top: 30.0),
+      //color: Colors.red,
+      child: Column(
+        children: [
+          Align(
+              alignment: Alignment.topLeft,
+              child: Text(
+                'Product Details',
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+              )),
+          SizedBox(
+            height: 10.0,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              widget.productDetails[productDescription],
+              textAlign: TextAlign.justify,
+              style: TextStyle(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _productKeyPoints() {
+    return Container(
+      margin: EdgeInsets.only(top: 30.0),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+              child: Text(
+            'Key Points',
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+          )),
+          SizedBox(
+            height: 10.0,
+          ),
+          Align(
+            alignment: Alignment.topLeft,
+            child: Text(
+              widget.productDetails[productKeyPoints],
+              textAlign: TextAlign.justify,
+              style: TextStyle(),
+            ),
+          ),
+        ],
       ),
     );
   }

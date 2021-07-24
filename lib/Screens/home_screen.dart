@@ -246,7 +246,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       margin: EdgeInsets.only(top: 20.0, bottom: 10.0),
       child: CarouselSlider(
-        options: CarouselOptions(autoPlay: true, height: 180),
+        options: CarouselOptions(
+          autoPlay: true,
+          height: 180,
+          autoPlayCurve: Curves.fastOutSlowIn,
+          enableInfiniteScroll: true,
+          autoPlayAnimationDuration: Duration(milliseconds: 1500),
+          viewportFraction: 0.8,
+        ),
         items: [0, 1, 2, 3].map((i) {
           return Builder(
             builder: (BuildContext context) {
@@ -561,7 +568,8 @@ class _HomeScreenState extends State<HomeScreen> {
           openColor: Colors.white,
           closedElevation: 0.0,
           transitionDuration: Duration(milliseconds: 500),
-          openBuilder: (openBuilderContext, openWidget) => ProductDetailsShow(productDetails: this._findProducts[index]),
+          openBuilder: (openBuilderContext, openWidget) =>
+              ProductDetailsShow(productDetails: this._findProducts[index]),
           closedBuilder: (closeBuilderContext, closeWidget) => Container(
             width: double.maxFinite,
             height: 140.0,
@@ -623,9 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 10.0,
                             ),
                             Text(
-                              this
-                                  ._findProducts[index]['ProductActualPrice']
-                                  .toString(),
+                              '${this._findProducts[index]['ProductActualPrice']} ${this._findProducts[index][priceCurrency]}',
                               style: TextStyle(
                                   fontSize: 12.0,
                                   decoration: TextDecoration.lineThrough,

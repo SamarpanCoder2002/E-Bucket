@@ -246,6 +246,8 @@ class _SellProductAsSellerState extends State<SellProductAsSeller> {
             this._subCategorySpecification =
                 this._allCategoryMap[newValue.toString()] as List<dynamic>;
 
+            this._subCategorySpecification.sort();
+
             this._subCategoryName = this._subCategorySpecification[0];
           });
         }

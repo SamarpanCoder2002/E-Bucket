@@ -1,3 +1,6 @@
+final String storeName = 'StoreName';
+final String storeAddress = 'StoreAddress';
+
 final String productName = 'ProductName';
 final String productMainCategory = 'ProductMainCategory';
 final String productSubCategory = 'ProductSubCategory';

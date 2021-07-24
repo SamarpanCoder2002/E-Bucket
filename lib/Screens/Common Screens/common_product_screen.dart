@@ -11,6 +11,7 @@ class CommonProductScreen extends StatefulWidget {
   final double elevation;
   final bool actionsAndMenu;
   final String pageTitle;
+  final Widget? bottomWidget;
 
   CommonProductScreen({
     Key? key,
@@ -18,6 +19,7 @@ class CommonProductScreen extends StatefulWidget {
     required this.elevation,
     this.actionsAndMenu = true,
     this.pageTitle = 'E-Bucket',
+    this.bottomWidget,
   }) : super(key: key);
 
   @override
@@ -33,6 +35,7 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      bottomSheet: widget.bottomWidget,
       drawer: this.widget.actionsAndMenu
           ? LoadingOverlay(
               isLoading: this._isLoading,

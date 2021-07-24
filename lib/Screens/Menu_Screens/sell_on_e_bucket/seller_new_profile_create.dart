@@ -25,12 +25,6 @@ class _SellOnEBucketState extends State<SellOnEBucket> {
   bool _isLoading = false;
 
   @override
-  void initState() {
-
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return LoadingOverlay(
       isLoading: this._isLoading,

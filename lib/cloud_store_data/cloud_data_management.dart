@@ -11,9 +11,6 @@ class CloudDataStore {
   final String _sellerPath = 'sellers';
   final String _categoryPath = 'category';
 
-  final String _storeName = 'StoreName';
-  final String _storeAddress = 'StoreAddress';
-
   Future<void> dataStoreForConsumers(String email) async {
     try {
       await FirebaseFirestore.instance.doc('$_consumerPath/$email').set({
@@ -113,8 +110,8 @@ class CloudDataStore {
               productActualPrice: actualPriceLocal,
               productDiscountPrice: discountPriceLocal,
               productMainImageUrl: mainProductImageUrlLocal,
-              this._storeName: storeNameLocal,
-              this._storeAddress: storeAddressLocal,
+              storeName: storeNameLocal,
+              storeAddress: storeAddressLocal,
             }
           ]
         }).whenComplete(() => print('Completed Firestore Uplaod'));
@@ -144,8 +141,8 @@ class CloudDataStore {
                 priceCurrency: priceCurrencyLocal,
                 productActualPrice: actualPriceLocal,
                 productDiscountPrice: discountPriceLocal,
-                this._storeName: storeNameLocal,
-                this._storeAddress: storeAddressLocal,
+                storeName: storeNameLocal,
+                storeAddress: storeAddressLocal,
                 productMainImageUrl: mainProductImageUrlLocal,
               }
             ]
@@ -191,8 +188,8 @@ class CloudDataStore {
             priceCurrency: priceCurrencyLocal,
             productActualPrice: actualPriceLocal,
             productDiscountPrice: discountPriceLocal,
-            this._storeName: storeNameLocal,
-            this._storeAddress: storeAddressLocal,
+            storeName: storeNameLocal,
+            storeAddress: storeAddressLocal,
             productMainImageUrl: mainProductImageUrlLocal,
           });
 

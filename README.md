@@ -1,6 +1,24 @@
-# e_bucket
+### <p align="center">E-Bucket</p>
 
-A new Flutter project.
+#### <p align="center"> An E-Commerce App Clone Made In Flutter With Firebase</p>
+
+<p align="center">
+    <img src="documents/1.jpg" width="250" alt="Home Page Picture">
+    <img src="documents/2.jpg" width="250" alt="Product Collection Picture">
+    <img src="documents/3.jpg" width="250" alt="Product Details Picture">
+</p>
+
+<h3 align="center">Show 💘 by Starring This Repo</h3>
+
+- #### [Click Here to See the Project Video](https://youtu.be/3wP8md_vIrM)
+
+- #### [App Download Url]()
+
+- #### [Follow me on LinkedIn To get Regular Project Updates](https://www.linkedin.com/in/samarpan-dasgupta-4aa1061b0/)
+
+
+<h3 align="center"><b>🧡 Thank You For Visiting 🙏, Have a Nice Day 🧡</b></h3>
+
 
 ## Getting Started
 

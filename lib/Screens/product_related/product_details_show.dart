@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class ProductDetailsShow extends StatefulWidget {
   final Map<String, dynamic> productDetails;
@@ -22,6 +23,7 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
   String _dropDownText = 'Qty: 1';
 
   final CloudDataStore _cloudDataStore = CloudDataStore();
+  final Razorpay _razorpay = Razorpay();
 
   _productSlider() {
     if (mounted) {
@@ -31,10 +33,52 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
     }
   }
 
+  void _handlePaymentSuccess(PaymentSuccessResponse response) {
+    print('Success: ${response.paymentId}');
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    print('Error: ${response.message}');
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    print('For External Wallet: ${response.walletName}');
+  }
+
+  Future<void> _makePayment() async {
+    print('Link: ${widget.productDetails[productMainImageUrl].toString()}');
+    var options = {
+      'key': 'RAzorpay Key',
+      'amount':
+          '${_getMinimumPrice() * int.parse(this._dropDownText.toString().split(' ')[1]) * 100}',
+      "currency": widget.productDetails[priceCurrency].toString(),
+      'email': FirebaseAuth.instance.currentUser!.email.toString(),
+      'name': widget.productDetails[productName],
+      'description':
+          'Total Products ${this._dropDownText.toString().split(' ')[1]}',
+      'prefill': {'email': FirebaseAuth.instance.currentUser!.email.toString()}
+    };
+
+    try {
+      this._razorpay.open(options);
+    } catch (e) {
+      print('Razorpay Error is: ${e.toString()}');
+    }
+  }
+
   @override
   void initState() {
     _productSlider();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    this._razorpay.clear();
+    super.dispose();
   }
 
   @override
@@ -101,7 +145,9 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
                     'Buy Now',
                     style: TextStyle(color: Colors.white),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    await _makePayment();
+                  },
                 ),
               ),
             ),
@@ -181,33 +227,24 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
                     //minScale: PhotoViewComputedScale.covered,
                   ),
                 )),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 45.0,
-              height: 45.0,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.red,
-              ),
-              child: Text(
-                '${_getDiscountPercentage()}%\nOff',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12.0),
-              ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Container(
+            width: 45.0,
+            height: 45.0,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.red,
             ),
-            IconButton(
-              icon: Icon(
-                Icons.share_outlined,
-                size: 30.0,
-              ),
-              onPressed: () {},
+            child: Text(
+              '${_getDiscountPercentage()}%\nOff',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 12.0),
             ),
-          ],
+          ),
         ),
       ],
     );

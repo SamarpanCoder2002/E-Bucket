@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-import 'package:e_bucket/global_uses/product_details.dart';
+import 'package:e_bucket/global_uses/product_details_helper.dart';
 
 class CloudDataStore {
   final String _consumerPath = 'consumers';
@@ -15,8 +15,11 @@ class CloudDataStore {
     try {
       await FirebaseFirestore.instance.doc('$_consumerPath/$email').set({
         'email': '$email',
-        'cart': '0',
+        'cart': [],
         'orders': [],
+        'name': '',
+        'address': '',
+        'profilePicUrl': '',
       });
     } catch (e) {
       print('Data Store For Consumers Error: ${e.toString()}');
@@ -254,7 +257,7 @@ class CloudDataStore {
   }
 
   Future<Map<String, dynamic>?> getAllThings(
-      {required String mainCategory, required String subCategory}) async {
+      {required String? mainCategory, required String subCategory}) async {
     print('Main Category: $mainCategory');
     print('Sub Category: $subCategory');
     final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
@@ -264,5 +267,71 @@ class CloudDataStore {
 
     /// print(documentSnapshot.data());
     return documentSnapshot.data();
+  }
+
+  Future<bool> addNewItemToCart(
+      {required String email, required Map<String, dynamic> productMap}) async {
+    try {
+      final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+          await FirebaseFirestore.instance
+              .doc('${this._consumerPath}/$email')
+              .get();
+      print(documentSnapshot.data());
+
+      final List<dynamic> _cartCollection = documentSnapshot.data()!['cart'];
+      _cartCollection.add(productMap);
+
+      await FirebaseFirestore.instance
+          .doc('${this._consumerPath}/$email')
+          .update({
+        'cart': _cartCollection,
+      });
+
+      return true;
+    } catch (e) {
+      print('Error In Add New Item Cart: ${e.toString()}');
+      return false;
+    }
+  }
+
+  // Future<bool> profileSectionAddThings(
+  //     {required String email,
+  //     required String userName,
+  //     required String userAddress,
+  //     required String profilePicLocalPath}) async {
+  //   try {
+  //     final String downloadUrl = await uploadMediaToStorage(
+  //         File(profilePicLocalPath),
+  //         reference: 'UserProfileImages/');
+  //
+  //     await FirebaseFirestore.instance
+  //         .doc('${this._consumerPath}/$email')
+  //         .update({
+  //       'name': userName,
+  //       'address': userAddress,
+  //       'profilePicUrl': downloadUrl,
+  //     });
+  //
+  //     return true;
+  //   } catch (e) {
+  //     print('Error in Profile Section And Things: ${e.toString()}');
+  //     return false;
+  //   }
+  // }
+
+  Future<List<dynamic>> getCartSavedProducts({required String email}) async{
+    try{
+      final DocumentSnapshot<Map<String, dynamic>> documentSnapshot =
+      await FirebaseFirestore.instance
+          .doc('${this._consumerPath}/$email')
+          .get();
+      print(documentSnapshot.data());
+
+      final List<dynamic> _cartCollection = documentSnapshot.data()!['cart'];
+      return _cartCollection;
+    }catch(e){
+      print('Error in getCartSavedProducts: ${e.toString()}');
+        return [];
+    }
   }
 }

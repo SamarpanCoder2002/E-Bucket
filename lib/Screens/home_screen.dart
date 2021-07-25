@@ -1,9 +1,8 @@
-import 'package:animations/animations.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
-import 'package:e_bucket/Screens/product_related/product_details_show.dart';
+import 'package:e_bucket/Screens/product_related/product_collection_show.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
-import 'package:e_bucket/global_uses/product_details.dart';
+import 'package:e_bucket/global_uses/static_types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -18,37 +17,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> items = [
-    '',
-    '',
-    '',
-    '',
-  ];
-
-  final List<String> images = [
-    'assets/images/cr1.jpg',
-    'assets/images/cr2.jpg',
-    'assets/images/cr3.jpg',
-    'assets/images/cr4.png',
-  ];
-
-  final List<String> allCategoryImages = [
-    'assets/images/c2.png',
-    'assets/images/c3.png',
-    'assets/images/c4.png',
-    'assets/images/c5.png',
-    'assets/images/c6.png',
-    'assets/images/c7.png',
-  ];
-
-  final List<String> allCategoryName = [
-    'Mobiles',
-    'Electronics',
-    'Fashion',
-    'Toys',
-    'Sports',
-    'Jewellery',
-  ];
+  final HorizontalProductCategory _horizontalProductCategory =
+      HorizontalProductCategory();
+  final FeedPageProductSugession _feedPageProductSugession =
+      FeedPageProductSugession();
 
   final Map<String, dynamic> _productMap = {};
   final List<String> _searchKeyword = [];
@@ -112,8 +84,6 @@ class _HomeScreenState extends State<HomeScreen> {
           this._findProducts = listValues;
         });
       }
-
-      print(this._findProducts);
     }
 
     if (mounted) {
@@ -121,6 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
         this._isLoading = false;
       });
     }
+
+    Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) {
+      return ProductCollection(
+        findProducts: this._findProducts,
+        title: this._searchedKeyWord.toString(),
+      );
+    }));
   }
 
   Widget _dropDownSearch() {
@@ -192,23 +169,19 @@ class _HomeScreenState extends State<HomeScreen> {
             height: MediaQuery.of(context).size.height,
             color: Colors.white,
             padding: EdgeInsets.all(this._searchedKeyWord != '' ? 12.0 : 0.0),
-            child: this._searchedKeyWord != ''
-                ? _uponProductSearch()
-                : ListView(
-                    shrinkWrap: true,
-                    children: [
-                      _categoryOption(),
-                      _autoSlider(),
-
-                      ///_storiesSection(),
-                      _interestedSection(),
-                      _topDiscountSection(),
-                      _popularPicks(),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                    ],
-                  ),
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                _categoryOption(),
+                _autoSlider(),
+                _interestedSection(),
+                _topDiscountSection(),
+                _popularPicks(),
+                SizedBox(
+                  height: 20.0,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -224,17 +197,22 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         itemCount: 6,
         itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 10.0, top: 10.0, right: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Image.asset(
-                  this.allCategoryImages[index],
-                  width: 35.0,
-                ),
-                Text(this.allCategoryName[index]),
-              ],
+          return GestureDetector(
+            onTap: () => _makeSearchableKeyword(
+                this._horizontalProductCategory.categoryProductKeyword[index]),
+            child: Padding(
+              padding:
+                  const EdgeInsets.only(left: 10.0, top: 10.0, right: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Image.asset(
+                    this._horizontalProductCategory.allCategoryImages[index],
+                    width: 35.0,
+                  ),
+                  Text(this._horizontalProductCategory.allCategoryName[index]),
+                ],
+              ),
             ),
           );
         },
@@ -262,7 +240,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 margin: EdgeInsets.symmetric(horizontal: 5.0),
                 decoration: BoxDecoration(
                     image: DecorationImage(
-                  image: ExactAssetImage(images[i]),
+                  image: ExactAssetImage(
+                      this._horizontalProductCategory.images[i]),
                 )),
               );
             },
@@ -271,44 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Widget _storiesSection() {
-  //   return Container(
-  //     margin: EdgeInsets.only(top: 15.0, left: 5.0),
-  //     width: MediaQuery.of(context).size.width,
-  //     height: 85.0 + 40.0,
-  //     child: Column(
-  //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //       children: [
-  //         Container(
-  //             alignment: Alignment.centerLeft,
-  //             padding: EdgeInsets.only(left: 10.0),
-  //             child: Text(
-  //               'Stories',
-  //               style: TextStyle(fontSize: 18.0),
-  //             )),
-  //         Container(
-  //           padding: EdgeInsets.only(left: 10.0, right: 10.0),
-  //           width: MediaQuery.of(context).size.width,
-  //           height: 100.0,
-  //           child: ListView.builder(
-  //             scrollDirection: Axis.horizontal,
-  //             itemCount: 10,
-  //             itemBuilder: (context, index) {
-  //               return Padding(
-  //                 padding: const EdgeInsets.only(right: 20.0),
-  //                 child: CircleAvatar(
-  //                   radius: 40.0,
-  //                   backgroundColor: Colors.black12,
-  //                 ),
-  //               );
-  //             },
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _interestedSection() {
     return Container(
@@ -336,19 +277,29 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 productImageDivider(
                   firstBlockImageUrl:
-                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/product-500x500.jpeg?alt=media&token=f757c5f6-7c8d-44b0-86e2-f6266e95b160',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fproduct-500x500.jpg?alt=media&token=6252eb29-a6a3-4c78-bb20-3201b7b8f577',
                   secondBlockImageUrl:
-                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Apple-iPhone-12-Mini-500x500.webp?alt=media&token=b1654451-3e2a-45ed-a1c0-5b570e744083',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2FApple-iPhone-12-Mini-500x500.webp?alt=media&token=c47a3c12-00d8-4370-95ab-8d7ed7e38440',
                   firstBlockImageCaption: 'Sunglass',
                   secondBlockImageCaption: 'IPhone',
+                  searchKeywordSecond:
+                      this._feedPageProductSugession.interested[0].toString(),
+                  searchKeywordFirst:
+                      this._feedPageProductSugession.interested[1].toString(),
                 ),
                 productImageDivider(
                     firstBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/54510_230553207.jfif?alt=media&token=8412bf0d-a3d4-47d9-889c-c4764620db7f',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2F54510_230553207.jpg?alt=media&token=5779dfeb-a91e-449a-8b5a-74672b18155e',
                     secondBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/these-12-laptops-deliver-the-best-battery-life-page-6-zdnet-hd-nature-png-for-laptop-514_428.png?alt=media&token=b13e2893-d762-427d-8c84-d7e90809b0df',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fthese-12-laptops-deliver-the-best-battery-life-page-6-zdnet-hd-nature-png-for-laptop-514_428.png?alt=media&token=7a870a49-5373-4382-805e-28076dcd861b',
                     firstBlockImageCaption: 'Dress',
-                    secondBlockImageCaption: 'Laptops'),
+                    secondBlockImageCaption: 'Laptops',
+                    searchKeywordFirst:
+                        this._feedPageProductSugession.interested[2].toString(),
+                    searchKeywordSecond: this
+                        ._feedPageProductSugession
+                        .interested[3]
+                        .toString()),
               ],
             ),
           ),
@@ -361,48 +312,50 @@ class _HomeScreenState extends State<HomeScreen> {
       {required String firstBlockImageUrl,
       required String secondBlockImageUrl,
       required String firstBlockImageCaption,
-      required String secondBlockImageCaption}) {
+      required String secondBlockImageCaption,
+      required String searchKeywordFirst,
+      required String searchKeywordSecond}) {
     return Row(
       children: [
         Expanded(
-          child: Container(
-            width: double.maxFinite / 2,
-            height: (270 - 20) / 2,
-            //color: Colors.deepPurple,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: double.maxFinite / 2,
-                  height: (270 - 10) / 2 - 30,
-                  child: PhotoView(
-                    imageProvider: NetworkImage(firstBlockImageUrl),
-                    loadingBuilder: (context, event) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorBuilder: (context, obj, stackTrace) => Center(
-                        child: Text(
-                      'X',
-                      style: TextStyle(
-                        fontSize: 40.0,
-                        color: Colors.red,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
+          child: GestureDetector(
+            onTap: () async {
+              print(searchKeywordSecond);
+              await _makeSearchableKeyword(searchKeywordFirst);
+            },
+            child: Container(
+              width: double.maxFinite / 2,
+              height: (270 - 20) / 2,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: double.maxFinite / 2,
+                    height: (270 - 10) / 2 - 30,
+                    child: PhotoView(
+                      imageProvider: NetworkImage(firstBlockImageUrl),
+                      loadingBuilder: (context, event) => Center(
+                        child: CircularProgressIndicator(),
                       ),
-                    )),
-                    enableRotation: false,
-                    backgroundDecoration: BoxDecoration(
-                      color: Colors.white,
+                      errorBuilder: (context, obj, stackTrace) => Center(
+                          child: Image.asset(
+                        'assets/images/error_image.jpg',
+                        width: 80.0,
+                      )),
+                      enableRotation: false,
+                      backgroundDecoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      //minScale: PhotoViewComputedScale.covered,
                     ),
-                    //minScale: PhotoViewComputedScale.covered,
-                  ),
 
-                  // Image.network(
-                  //   firstBlockImageUrl,
-                  // ),
-                ),
-                Text(firstBlockImageCaption),
-              ],
+                    // Image.network(
+                    //   firstBlockImageUrl,
+                    // ),
+                  ),
+                  Text(firstBlockImageCaption),
+                ],
+              ),
             ),
           ),
         ),
@@ -410,40 +363,40 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 10.0,
         ),
         Expanded(
-          child: Container(
-            width: double.maxFinite / 2,
-            height: (270 - 20) / 2,
-            //color: Colors.deepPurple,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: double.maxFinite / 2,
-                  height: (270 - 10) / 2 - 30,
-                  child: PhotoView(
-                    imageProvider: NetworkImage(secondBlockImageUrl),
-                    loadingBuilder: (context, event) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorBuilder: (context, obj, stackTrace) => Center(
-                        child: Text(
-                      'X',
-                      style: TextStyle(
-                        fontSize: 40.0,
-                        color: Colors.red,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
+          child: GestureDetector(
+            onTap: () async {
+              await _makeSearchableKeyword(searchKeywordSecond);
+            },
+            child: Container(
+              width: double.maxFinite / 2,
+              height: (270 - 20) / 2,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: double.maxFinite / 2,
+                    height: (270 - 10) / 2 - 30,
+                    child: PhotoView(
+                      imageProvider: NetworkImage(secondBlockImageUrl),
+                      loadingBuilder: (context, event) => Center(
+                        child: CircularProgressIndicator(),
                       ),
-                    )),
-                    enableRotation: false,
-                    backgroundDecoration: BoxDecoration(
-                      color: Colors.white,
+                      errorBuilder: (context, obj, stackTrace) => Center(
+                          child: Center(
+                              child: Image.asset(
+                        'assets/images/error_image.jpg',
+                        width: 80.0,
+                      ))),
+                      enableRotation: false,
+                      backgroundDecoration: BoxDecoration(
+                        color: Colors.white,
+                      ),
+                      //minScale: PhotoViewComputedScale.covered,
                     ),
-                    //minScale: PhotoViewComputedScale.covered,
                   ),
-                ),
-                Text(secondBlockImageCaption),
-              ],
+                  Text(secondBlockImageCaption),
+                ],
+              ),
             ),
           ),
         ),
@@ -484,25 +437,49 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 productImageDivider(
                     firstBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/mens-cotton-shirts-500x500.jpg?alt=media&token=2beada69-e6af-4efd-ace5-b7817c9fc48c',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fmens-cotton-shirts-500x500.jpg?alt=media&token=4ab15042-c48b-4d0e-a0e3-e01a005429c0',
                     secondBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41k3qq-x5CL.jpg?alt=media&token=50cae35a-8a20-483f-94e8-9bda0cf066e2',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2F41k3qq-x5CL.jpg?alt=media&token=38f031ad-afd3-41bd-82f0-7ce7bc510d5f',
                     firstBlockImageCaption: 'T-Shirt',
-                    secondBlockImageCaption: 'Smart Watch'),
+                    secondBlockImageCaption: 'Smart Watch',
+                    searchKeywordSecond: this
+                        ._feedPageProductSugession
+                        .topDiscount[0]
+                        .toString(),
+                    searchKeywordFirst: this
+                        ._feedPageProductSugession
+                        .topDiscount[1]
+                        .toString()),
                 productImageDivider(
                     firstBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/Canon-EOS-250D-DSLR-Camera-with-18-55mm-IS-STM-Lens-2-Black.jpg?alt=media&token=bf6eabb4-8a66-492a-b6b9-e244d9893964',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2FCanon-EOS-250D-DSLR-Camera-with-18-55mm-IS-STM-Lens-2-Black.jpg?alt=media&token=72991992-5dd8-4dec-bdd1-40af3e10b40d',
                     secondBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/glider-football-500x500.jpg?alt=media&token=6db85caf-5190-436c-bf04-e3a9ebc0a824',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fglider-football-500x500.jpg?alt=media&token=7e368aa8-df61-435c-a89f-a20dd0929e99',
                     firstBlockImageCaption: 'Camera',
-                    secondBlockImageCaption: 'Football'),
+                    secondBlockImageCaption: 'Football',
+                    searchKeywordFirst: this
+                        ._feedPageProductSugession
+                        .topDiscount[2]
+                        .toString(),
+                    searchKeywordSecond: this
+                        ._feedPageProductSugession
+                        .topDiscount[3]
+                        .toString()),
                 productImageDivider(
                     firstBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/41a0powQqYL.jpg?alt=media&token=7d9a16fa-6fef-46f1-9d30-434a16e020bb',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2F41a0powQqYL.jpg?alt=media&token=1628f2e3-af56-4e48-89b2-1f79c6fd6012',
                     secondBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/wooden-cupboard-500x500.jpg?alt=media&token=4634c69f-8d15-4f3a-89d7-05ac66dbf344',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fwooden-cupboard-500x500.jpg?alt=media&token=050bf4d4-4071-434a-bae8-5ea0be8f05bf',
                     firstBlockImageCaption: 'Binocular',
-                    secondBlockImageCaption: 'WarDrobe'),
+                    secondBlockImageCaption: 'WarDrobe',
+                    searchKeywordSecond: this
+                        ._feedPageProductSugession
+                        .topDiscount[4]
+                        .toString(),
+                    searchKeywordFirst: this
+                        ._feedPageProductSugession
+                        .topDiscount[5]
+                        .toString()),
               ],
             ),
           ),
@@ -535,161 +512,36 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 productImageDivider(
                   firstBlockImageUrl:
-                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/3103miMj8mL.jpg?alt=media&token=7d0754e3-dc9c-4c0f-a0b0-68559b35eaa0',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2F3103miMj8mL.jpg?alt=media&token=661b15bb-ca59-4e39-b0da-710b6c654396',
                   secondBlockImageUrl:
-                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/fc7a09d8ab8bb854f93f956b4d76ee1b.jpg?alt=media&token=9cc34b28-353c-4c68-acfc-ba46ba0a531c',
+                      'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Ffc7a09d8ab8bb854f93f956b4d76ee1b.jpg?alt=media&token=e06481a7-f327-4117-ba6c-ef601545aa09',
                   firstBlockImageCaption: 'IPhone',
                   secondBlockImageCaption: 'Headset',
+                  searchKeywordSecond:
+                      this._feedPageProductSugession.popularPicks[0].toString(),
+                  searchKeywordFirst:
+                      this._feedPageProductSugession.popularPicks[1].toString(),
                 ),
                 productImageDivider(
                     firstBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/rgb-gaming-desktop-500x500.jpg?alt=media&token=36d9d714-3f0b-4a03-a3b7-604ff4cca1b3',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Frgb-gaming-desktop-500x500.jpg?alt=media&token=08c10419-34f7-4cdc-839d-0a5bee67516d',
                     secondBlockImageUrl:
-                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/echo-show-8-500x500.jpg?alt=media&token=eb4b41cf-8308-4fc8-85c8-885ca072199f',
+                        'https://firebasestorage.googleapis.com/v0/b/e-bucket-da8c0.appspot.com/o/feedpage_suggession%2Fecho-show-8-500x500.jpg?alt=media&token=de2557a1-191f-4c83-a649-1db0175398c4',
                     firstBlockImageCaption: 'Gaming Computer',
-                    secondBlockImageCaption: 'Amazon Alexa'),
+                    secondBlockImageCaption: 'Amazon Alexa',
+                    searchKeywordSecond: this
+                        ._feedPageProductSugession
+                        .popularPicks[2]
+                        .toString(),
+                    searchKeywordFirst: this
+                        ._feedPageProductSugession
+                        .popularPicks[3]
+                        .toString()),
               ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  Widget _uponProductSearch() {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: this._findProducts.length,
-      itemBuilder: (itemContext, index) {
-        print(this._findProducts);
-        return OpenContainer(
-          closedColor: Colors.white,
-          middleColor: Colors.white,
-          openColor: Colors.white,
-          closedElevation: 0.0,
-          transitionDuration: Duration(milliseconds: 500),
-          openBuilder: (openBuilderContext, openWidget) =>
-              ProductDetailsShow(productDetails: this._findProducts[index]),
-          closedBuilder: (closeBuilderContext, closeWidget) => Container(
-            width: double.maxFinite,
-            height: 140.0,
-            margin: EdgeInsets.only(bottom: 10.0),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width / 3,
-                  child: PhotoView(
-                    imageProvider: NetworkImage(
-                        this._findProducts[index]['ProductMainImageUrl']),
-                    loadingBuilder: (context, event) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorBuilder: (context, obj, stackTrace) => Center(
-                        child: Text(
-                      'X',
-                      style: TextStyle(
-                        fontSize: 40.0,
-                        color: Colors.red,
-                        fontFamily: 'Lora',
-                        letterSpacing: 1.0,
-                      ),
-                    )),
-                    enableRotation: false,
-                    backgroundDecoration: BoxDecoration(
-                      color: Colors.white,
-                    ),
-                    //minScale: PhotoViewComputedScale.covered,
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Text(
-                          _getProductTitle(
-                              this._findProducts[index]['ProductName']),
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(
-                              fontSize: 14.0, fontWeight: FontWeight.w500),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            bottom: 12.0, left: 12.0, right: 12.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '${_getMinimumPrice(index)}${this._findProducts[index]['Currency']}',
-                              style: TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              width: 10.0,
-                            ),
-                            Text(
-                              '${this._findProducts[index]['ProductActualPrice']} ${this._findProducts[index][priceCurrency]}',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.w500),
-                            ),
-                            SizedBox(
-                              width: 10.0,
-                            ),
-                            Expanded(
-                                child: Text(
-                              '${_getDiscountPercentage(index)}% Off',
-                              style: TextStyle(
-                                  fontSize: 12.0,
-                                  color: Colors.black45,
-                                  fontWeight: FontWeight.w500),
-                            )),
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  String _getProductTitle(String productTitle) {
-    if (productTitle.split(" ").length >= 16) {
-      final List<String> afterSplitting = productTitle.split(" ");
-      afterSplitting.replaceRange(16, afterSplitting.length, ['...']);
-      final String afterModified = afterSplitting.join(" ");
-      return afterModified;
-    }
-    return productTitle;
-  }
-
-  int _getMinimumPrice(int index) => (double.parse(
-              this._findProducts[index]['ProductActualPrice'].toString()) -
-          double.parse(
-              this._findProducts[index]['ProductDiscountPrice'].toString()))
-      .toInt();
-
-  String _getDiscountPercentage(int index) {
-    final double savePercentage = double.parse(((double.parse(this
-                    ._findProducts[index][productDiscountPrice]
-                    .toString()) /
-                double.parse(
-                    this._findProducts[index][productActualPrice].toString())) *
-            100.0)
-        .toStringAsFixed(1));
-
-    if (int.parse(savePercentage.toString().split('.')[1]) > 0)
-      return savePercentage.toString();
-    return savePercentage.toString().split('.')[0];
   }
 }

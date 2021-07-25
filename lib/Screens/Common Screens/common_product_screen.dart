@@ -1,5 +1,6 @@
 import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/sell_product.dart';
 import 'package:e_bucket/Screens/Menu_Screens/sell_on_e_bucket/seller_new_profile_create.dart';
+import 'package:e_bucket/Screens/product_related/product_collection_show.dart';
 import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -59,62 +60,8 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
                         ),
                         color: Theme.of(context).accentColor,
                       ),
-                      TextButton(
-                        onPressed: () async {
-                          if (mounted) {
-                            setState(() {
-                              this._isLoading = true;
-                            });
-                          }
-
-                          final bool sellerExistence =
-                              await _cloudDataStore.alreadySellerAccountPresent(
-                                  FirebaseAuth.instance.currentUser!.email
-                                      .toString());
-
-                          if (!sellerExistence)
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => SellOnEBucket()));
-                          else {
-                            final List<dynamic>? storeNameAndAddress =
-                                await _cloudDataStore.getStoreNameAndAddress(
-                                    email: FirebaseAuth
-                                        .instance.currentUser!.email
-                                        .toString());
-
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => SellProductAsSeller(
-                                          companyName: storeNameAndAddress![0]
-                                              .toString(),
-                                          companyAddress:
-                                              storeNameAndAddress[1].toString(),
-                                        )));
-                          }
-
-                          if (mounted) {
-                            setState(() {
-                              this._isLoading = false;
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: 50.0,
-                          padding: EdgeInsets.only(
-                              top: 10.0, left: 40.0, bottom: 10.0),
-                          child: Text(
-                            'Sell on E-Bucket',
-                            style: TextStyle(
-                                fontSize: 20.0,
-                                fontFamily: 'Lora',
-                                color: Colors.black),
-                          ),
-                        ),
-                      ),
+                      //_menuButtons(buttonName: 'Your Profile'),
+                      _menuButtons(buttonName: 'Sell On E-Bucket'),
                     ],
                   ),
                 ),
@@ -142,12 +89,88 @@ class _CommonProductScreenState extends State<CommonProductScreen> {
                     Icons.shopping_cart_outlined,
                     color: Colors.white,
                   ),
-                  onPressed: () {},
+                  onPressed: _cartScreenIntro,
                 ),
               ]
             : null,
       ),
       body: widget.body,
     );
+  }
+
+  Future<void> _sellOnEBucket() async {
+    if (mounted) {
+      setState(() {
+        this._isLoading = true;
+      });
+    }
+
+    final bool sellerExistence =
+        await _cloudDataStore.alreadySellerAccountPresent(
+            FirebaseAuth.instance.currentUser!.email.toString());
+
+    if (!sellerExistence)
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => SellOnEBucket()));
+    else {
+      final List<dynamic>? storeNameAndAddress =
+          await _cloudDataStore.getStoreNameAndAddress(
+              email: FirebaseAuth.instance.currentUser!.email.toString());
+
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (_) => SellProductAsSeller(
+                    companyName: storeNameAndAddress![0].toString(),
+                    companyAddress: storeNameAndAddress[1].toString(),
+                  )));
+    }
+
+    if (mounted) {
+      setState(() {
+        this._isLoading = false;
+      });
+    }
+  }
+
+  Widget _menuButtons({required String buttonName}) {
+    return TextButton(
+      onPressed: () async {
+        if (buttonName == 'Sell On E-Bucket')
+          await _sellOnEBucket();
+        // else if (buttonName == 'Your Profile') {
+        //   Navigator.push(
+        //       context, MaterialPageRoute(builder: (_) => ProfileScreen()));
+        // }
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: 50.0,
+        padding: EdgeInsets.only(top: 10.0, left: 40.0, bottom: 10.0),
+        child: Text(
+          buttonName,
+          style: TextStyle(
+              fontSize: 20.0, fontFamily: 'Lora', color: Colors.black),
+        ),
+      ),
+    );
+  }
+
+  void _cartScreenIntro() async{
+    if(mounted){
+      setState(() {
+        this._isLoading = true;
+      });
+    }
+
+    final List<dynamic> _allSavedCartProducts = await _cloudDataStore.getCartSavedProducts(email: FirebaseAuth.instance.currentUser!.email.toString());
+    
+    Navigator.push(context, MaterialPageRoute(builder: (_) => ProductCollection(title: 'Cart', findProducts: _allSavedCartProducts)));
+
+    if(mounted){
+      setState(() {
+        this._isLoading = false;
+      });
+    }
   }
 }

@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_bucket/Screens/Common%20Screens/common_product_screen.dart';
-import 'package:e_bucket/global_uses/product_details.dart';
+import 'package:e_bucket/cloud_store_data/cloud_data_management.dart';
+import 'package:e_bucket/global_uses/product_details_helper.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:photo_view/photo_view.dart';
@@ -18,6 +20,8 @@ class ProductDetailsShow extends StatefulWidget {
 class _ProductDetailsShowState extends State<ProductDetailsShow> {
   List<dynamic> _productImages = [];
   String _dropDownText = 'Qty: 1';
+
+  final CloudDataStore _cloudDataStore = CloudDataStore();
 
   _productSlider() {
     if (mounted) {
@@ -65,7 +69,20 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
                     'Add to Cart',
                     style: TextStyle(color: Colors.black),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    final bool response =
+                        await _cloudDataStore.addNewItemToCart(
+                            email: FirebaseAuth.instance.currentUser!.email
+                                .toString(),
+                            productMap: widget.productDetails);
+
+                    final String msg = response
+                        ? 'Added to Cart'
+                        : 'Not added in cart...Try Again';
+
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(SnackBar(content: Text(msg)));
+                  },
                 ),
               ),
             ),
@@ -94,6 +111,7 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
+        margin: EdgeInsets.only(top: 10.0),
         padding: EdgeInsets.all(12.0),
         child: ListView(
           shrinkWrap: true,
@@ -356,11 +374,11 @@ class _ProductDetailsShowState extends State<ProductDetailsShow> {
       child: Column(
         children: [
           Align(
-            alignment: Alignment.topLeft,
+              alignment: Alignment.topLeft,
               child: Text(
-            'Key Points',
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
-          )),
+                'Key Points',
+                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w500),
+              )),
           SizedBox(
             height: 10.0,
           ),

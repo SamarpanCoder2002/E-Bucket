@@ -20,7 +20,7 @@
 
 <h3 align="center">Show 💘 by Starring This Repo</h3>
 
-- #### [Click Here to See the Project Video](https://youtu.be/3wP8md_vIrM)
+- #### [Click Here to See the Project Video](https://youtu.be/nxZa9D8_wrc)
 
 - #### [App Download Url](https://drive.google.com/file/d/1ZwqLPUVxeekkj2g8sogE7J5mXqujp2-b/view?usp=sharing)
 
